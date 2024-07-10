@@ -19,7 +19,11 @@ from module.exception import (GameNotRunningError, GamePageUnknownError, Request
 
 class GameUi(BaseTask, GameUiAssets):
     ui_current: Page = None
-    ui_pages = [page_main, page_summon, page_exploration, page_town,
+    ui_pages = [
+                # 登录
+                page_login,
+                # 主页
+                page_main, page_summon, page_exploration, page_town,
                 # 探索的
                 page_awake_zones, page_soul_zones, page_realm_raid, page_goryou_realm, page_delegation,
                 page_secret_zones, page_area_boss, page_heian_kitan, page_six_gates, page_bondling_fairyland,
@@ -28,7 +32,7 @@ class GameUi(BaseTask, GameUiAssets):
                 page_duel, page_demon_encounter, page_hunt, page_draft_duel, page_hyakkisen,
                 # 庭院里面的
                 page_shikigami_records, page_onmyodo, page_friends, page_daily, page_mall, page_guild, page_team,
-                page_collection
+                page_collection,
                 ]
     ui_close = [GameUiAssets.I_BACK_MALL,
                 BaseTask.I_UI_BACK_RED, BaseTask.I_UI_BACK_YELLOW, BaseTask.I_UI_BACK_BLUE,
@@ -237,7 +241,6 @@ class GameUi(BaseTask, GameUiAssets):
                 #         if self.appear_then_click(button, interval=1):
                 #             sleep(0.2)
                 #             logger.info(f'Page {page} AB {button} clicked')
-
 
                 # 获取当前页面的要点击的按钮
                 if self.appear(page.check_button, interval=4):

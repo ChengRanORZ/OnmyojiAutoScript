@@ -106,5 +106,32 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "判断是否还有任务"
+  },
+  {
+    "itemName": "wq_trace_one_enable",
+    "imageName": "wq_trace_one_enable.png",
+    "roiFront": "160,175,120,60",
+    "roiBack": "160,175,120,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院悬赏任务界面 单个任务点开后 左上角是否追踪"
+  },
+  {
+    "itemName": "wq_trace_one_disable",
+    "imageName": "wq_trace_one_disable.png",
+    "roiFront": "160,175,120,60",
+    "roiBack": "160,175,120,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院悬赏任务界面 单个任务点开后 左上角是否追踪"
+  },
+  {
+    "itemName": "wq_trace_one_check_opened",
+    "imageName": "wq_trace_one_check_opened.png",
+    "roiFront": "510,175,210,60",
+    "roiBack": "510,175,210,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院悬赏任务界面 单个任务点开后的界面 是否打开的 标志"
   }
 ]

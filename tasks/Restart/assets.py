@@ -58,6 +58,12 @@ class RestartAssets:
 	I_LOGIN_SPECIFIC_SERVE = RuleImage(roi_front=(24,33,52,47), roi_back=(24,33,52,47), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_specific_serve.png")
 	# 下载插画 
 	I_LOGIN_LOAD_DOWN = RuleImage(roi_front=(711,450,153,58), roi_back=(711,450,153,58), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_load_down.png")
+	# 登录界面 弹出框 前往绑定 手机 
+	I_LOGIN_LOGIN_GOTO_BIND_PHONE = RuleImage(roi_front=(940,430,170,150), roi_back=(940,430,170,150), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_goto_bind_phone.png")
+	# 登录界面 弹出框 确定绑定手机 
+	I_LOGIN_LOGIN_ENSURE_BIND_PHONE = RuleImage(roi_front=(670,460,160,100), roi_back=(670,460,160,100), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_ensure_bind_phone.png")
+	# 登录界面 弹出框 取消绑定手机 
+	I_LOGIN_LOGIN_CANCEL_BIND_PHONE = RuleImage(roi_front=(450,460,160,100), roi_back=(450,460,160,100), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_cancel_bind_phone.png")
 
 
 	# Ocr Rule Assets

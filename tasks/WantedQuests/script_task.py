@@ -30,7 +30,12 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
 
     def run(self):
         con = self.config
-        if not self.pre_work():
+        preSuc = False
+        if self.config.wanted_quests.wanted_quests_config.cooperation_only:
+            preSuc = self.pre_work_cooperation_only()
+        else:
+            preSuc = self.pre_work()
+        if not preSuc:
             # 无法完成预处理 很有可能你已经完成了悬赏任务
             logger.warning('Cannot pre-work')
             logger.warning('You may have completed the reward task')
@@ -144,6 +149,63 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         self.ui_goto(page_exploration)
         return True
+
+    def pre_work_cooperation_only(self):
+        #
+        if self.ui_get_current_page() != page_main:
+            self.ui_goto(page_main)
+        # 打开悬赏封印 界面
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_TRACE_ENABLE) or self.appear(self.I_WQ_TRACE_ONE_DISABLE):
+                break
+            if self.appear_then_click(self.I_WQ_SEAL, interval=1):
+                continue
+            if self.special_main and self.click(self.C_SPECIAL_MAIN, interval=3):
+                logger.info('Click special main left to find wanted quests')
+                continue
+        #
+        if not (self.appear(self.I_WQ_INVITE_1) or self.appear(self.I_WQ_INVITE_2) or self.appear(self.I_WQ_INVITE_3)):
+            logger.info("there is no cooperation quest")
+            return False
+
+        # if self.appear(self.I_WQ_INVITE_1):
+        #     self.trace_one(self.I_WQ_INVITE_1)
+        # if self.appear(self.I_WQ_INVITE_2):
+        #     self.trace_one(self.I_WQ_INVITE_2)
+        # if self.appear(self.I_WQ_INVITE_3):
+        #     self.trace_one(self.I_WQ_INVITE_3)
+
+        # 追踪任务 并邀请
+        self.all_cooperation_invite(self.config.wanted_quests.wanted_quests_config.invite_friend_name)
+
+        self.ui_click_until_disappear(self.I_UI_BACK_RED)
+        self.ui_goto(page_exploration)
+        return True
+
+    def trace_one(self, btn: RuleImage):
+        """
+            参数必须为邀请按钮(I_WQ_INVITE_n ),特定场景,就不做通用的函数了,怪麻烦的,若还有什么奇葩需求,再扩展吧
+        @param btn: 邀请按钮,
+        @type btn:
+        """
+        self.screenshot()
+        if not self.appear(btn):
+            return
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_WQ_TRACE_ONE_ENABLE):
+                break
+            if self.appear(self.I_WQ_TRACE_ONE_DISABLE):
+                self.click(self.I_WQ_TRACE_ONE_DISABLE, interval=1.5)
+                continue
+            # 根据邀请按钮位置生成 对应的点击位置 打开追踪界面
+            # NOTE magic Number
+            self.device.click(btn.roi_front[0], btn.roi_front[1] - 40, control_name=str(btn) + ' y-40')
+            # 防止点击后界面来不及刷新
+            time.sleep(0.5)
+        # 关闭单个任务的追踪界面
+        self.ui_click_until_disappear(self.C_WQ_TRACE_ONE_CLOSE, stop=self.I_WQ_TRACE_ONE_CHECK_OPENED, interval=1.5)
 
     def execute_mission(self, ocr, num_want: int, num_challenge: int):
         """
@@ -293,6 +355,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
     def all_cooperation_invite(self, name: str):
         """
             所有的协作任务依次邀请
+            如果配置了只完成协作任务 还会将该任务设置为追踪
         @param name: 被邀请的朋友名
         @return:
 
@@ -305,8 +368,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         if len(ret) == 0:
             logger.info("no Cooperation found")
             return False
-        typeMask=15
-        typeMask = CooperationSelectMask [self.config.wanted_quests.wanted_quests_config.cooperation_type.value]
+        typeMask = 15
+        typeMask = CooperationSelectMask[self.config.wanted_quests.wanted_quests_config.cooperation_type.value]
         for item in ret:
             # 该任务是需要邀请的任务类型
             if not (item['type'] & typeMask):
@@ -319,6 +382,11 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                尝试5次 如果邀请失败 等待20s 重新尝试
                阴阳师BUG: 好友明明在线 但邀请界面找不到该好友(好友未接受任何协作任务的情况下)
            '''
+            # 邀请追踪一起吧
+            #
+            if self.config.wanted_quests.wanted_quests_config.cooperation_only:
+                self.trace_one(item['inviteBtn'])
+            logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             index = 0
             while index < 5:
                 if self.cooperation_invite(item['inviteBtn'], name):
@@ -327,7 +395,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 logger.info("%s not found,Wait 20s,%d invitations left", name, 5 - index - 1)
                 index += 1
                 sleep(20) if index < 5 else sleep(0)
-                #NOTE 等待过程如果出现协作邀请 将会卡住 为了防止卡住
+                # NOTE 等待过程如果出现协作邀请 将会卡住 为了防止卡住
                 self.screenshot()
         return ret
 
@@ -413,7 +481,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('回归')
+    c = Config('子曰')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()

@@ -15,6 +15,8 @@ class WantedQuestsAssets:
 	C_SECRET_CHAT = RuleClick(roi_front=(597,296,59,100), roi_back=(597,296,59,100), name="secret_chat")
 	# 特殊的庭院需要点击，然后才能找到这个悬赏 
 	C_SPECIAL_MAIN = RuleClick(roi_front=(409,572,32,30), roi_back=(404,569,41,35), name="special_main")
+	# 关闭 单个任务追踪界面 所需点击 的  空白区域 
+	C_WQ_TRACE_ONE_CLOSE = RuleClick(roi_front=(170,30,400,100), roi_back=(170,30,400,100), name="wq_trace_one_close")
 
 
 	# Ocr Rule Assets
@@ -79,7 +81,7 @@ class WantedQuestsAssets:
 	# 悬赏封印邀请取消按钮 
 	I_WQ_INVITE_CANCEL = RuleImage(roi_front=(230,540,132,60), roi_back=(230,540,140,65), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/invite/wq_invite_cancel.png")
 	# 邀请好友被选中标记 
-	I_WQ_INVITE_SELECTED = RuleImage(roi_front=(380,185,32,32), roi_back=(380,185,345,350), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/invite/wq_invite_selected.png")
+	I_WQ_INVITE_SELECTED = RuleImage(roi_front=(370,180,32,32), roi_back=(370,180,370,355), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/invite/wq_invite_selected.png")
 	# 邀请同服好友,由于选中与未选中亮度有区别,查找图片可能会出错,建议只使用位置信息 
 	I_WQ_INVITE_SAME_SVR = RuleImage(roi_front=(170,90,60,35), roi_back=(170,90,105,65), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/invite/wq_invite_same_svr.png")
 	# 邀请跨服好友,由于选中与未选中亮度有区别,查找图片可能会出错,建议只使用位置信息 
@@ -148,6 +150,12 @@ class WantedQuestsAssets:
 	I_GOTO_4 = RuleImage(roi_front=(979,447,87,42), roi_back=(979,447,87,42), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/wq/wq_goto_4.png")
 	# 判断是否还有任务 
 	I_WQ_CHECK_TASK = RuleImage(roi_front=(110,154,21,125), roi_back=(73,122,69,459), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/wq/wq_wq_check_task.png")
+	# 庭院悬赏任务界面 单个任务点开后 左上角是否追踪 
+	I_WQ_TRACE_ONE_ENABLE = RuleImage(roi_front=(160,175,120,60), roi_back=(160,175,120,60), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/wq/wq_trace_one_enable.png")
+	# 庭院悬赏任务界面 单个任务点开后 左上角是否追踪 
+	I_WQ_TRACE_ONE_DISABLE = RuleImage(roi_front=(160,175,120,60), roi_back=(160,175,120,60), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/wq/wq_trace_one_disable.png")
+	# 庭院悬赏任务界面 单个任务点开后的界面 是否打开的 标志 
+	I_WQ_TRACE_ONE_CHECK_OPENED = RuleImage(roi_front=(510,175,210,60), roi_back=(510,175,210,60), threshold=0.8, method="Template matching", file="./tasks/WantedQuests/wq/wq_trace_one_check_opened.png")
 
 
 	# Image Rule Assets

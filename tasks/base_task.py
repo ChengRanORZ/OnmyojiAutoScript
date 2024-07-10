@@ -1,6 +1,8 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+import cv2
+
 import numpy as np
 
 from time import sleep
@@ -483,7 +485,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             self.screenshot()
         return self.appear_then_click(self.I_UI_REWARD, action=self.C_UI_REWARD, interval=0.4, threshold=0.6)
 
-    def ui_get_reward(self, click_image: RuleImage or RuleOcr or RuleClick, click_interval: float=1):
+    def ui_get_reward(self, click_image: RuleImage or RuleOcr or RuleClick, click_interval: float = 1):
         """
         传进来一个点击图片 或是 一个ocr， 会点击这个图片，然后等待‘获得奖励’，
         最后当获得奖励消失后 退出
@@ -523,10 +525,9 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 if self.click(click_image, interval=click_interval):
                     continue
 
-
         return True
 
-    def ui_click(self, click, stop, interval=1):
+    def ui_click(self, click, stop=None, interval=1):
         """
         循环的一个操作，直到出现stop
         :param click:
@@ -534,27 +535,48 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         :parm interval
         :return:
         """
+        if stop is None:
+            stop = click
         while 1:
             self.screenshot()
+            # cv2.imshow('s',self.device.image)
+            # cv2.waitKey()
             if self.appear(stop):
                 break
-            if isinstance(click, RuleImage) and self.appear_then_click(click, interval=interval):
+            if isinstance(click, RuleImage):
+                logger.info("isinstance")
+                # cv2.imshow('s',self.device.image)
+                # cv2.waitKey()
+                if self.appear_then_click(click, interval=interval):
+                    logger.info("appear")
                 continue
             if isinstance(click, RuleClick) and self.click(click, interval=interval):
                 continue
             elif isinstance(click, RuleOcr) and self.ocr_appear_click(click, interval=interval):
                 continue
 
-    def ui_click_until_disappear(self, click, interval: float =1):
+    def ui_click_until_disappear(self, click, interval: float = 1, stop: RuleImage = None):
         """
-        点击一个按钮直到消失
-        :param interval:
-        :param click:
-        :return:
+        点击一个按钮直到stop消失
+        如果click为RuleOcr ,直接当作RuleClick点击,不会进行ocr识别,
+        @param interval:
+        @param click:
+        @param stop:
+        @type stop:
+        @return:
         """
+        if stop is None:
+            stop = click
         while 1:
             self.screenshot()
-            if not self.appear(click):
+            if not self.appear(stop):
                 break
-            elif self.appear_then_click(click, interval=interval):
+            if isinstance(click, RuleImage):
+                self.appear_then_click(click, interval=interval)
+                continue
+            elif isinstance(click, RuleClick):
+                self.click(click, interval)
+                continue
+            elif isinstance(click, RuleOcr):
+                self.click(click)
                 continue

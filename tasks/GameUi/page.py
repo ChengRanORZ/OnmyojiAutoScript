@@ -7,7 +7,6 @@ from tasks.RyouToppa.assets import RyouToppaAssets
 class Page:
     parent = None
 
-
     def __init__(self, check_button):
         self.check_button = check_button
         self.links = {}
@@ -27,9 +26,13 @@ class Page:
     def link(self, button, destination):
         self.links[destination] = button
 
+#登录login
+page_login=Page(G.I_CHECK_LOGIN_FORM)
 
 # Main Home 主页
 page_main = Page(G.I_CHECK_MAIN)
+page_main.additional=[G.I_MAIN_SCROLL_CLOSE]
+
 # 召唤summon
 page_summon = Page(G.I_CHECK_SUMMON)
 page_summon.link(button=G.I_SUMMON_GOTO_MAIN, destination=page_main)
@@ -94,7 +97,6 @@ page_bondling_fairyland = Page(G.I_CHECK_BONDLING_FAIRYLAND)
 page_bondling_fairyland.link(button=G.I_BACK_YOLLOW, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_BONDLING_FAIRYLAND, destination=page_bondling_fairyland)
 
-
 # ************************************* 町中部分 *****************************************#
 # 斗鸡 duel
 page_duel = Page(G.I_CHECK_DUEL)
@@ -120,7 +122,6 @@ page_town.link(button=G.I_TOWN_GOTO_HYAKKISEN, destination=page_hyakkisen)
 page_hyakkiyakou = Page(G.I_CHECK_KYAKKIYAKOU)
 page_hyakkiyakou.link(button=G.I_HYAKKIYAKOU_CLOSE, destination=page_town)
 page_town.link(button=G.I_TOWN_GOTO_HYAKKIYAKOU, destination=page_hyakkiyakou)
-
 
 # ************************************* 庭院部分 *****************************************#
 # 式神录 shikigami_records
@@ -162,10 +163,3 @@ page_main.link(button=G.I_MAIN_GOTO_COLLECTION, destination=page_collection)
 page_travel = Page(G.I_CHECK_TRAVEL)
 page_travel.link(button=G.I_BACK_Y, destination=page_main)
 page_main.link(button=G.I_MAIN_GOTO_TRAVEL, destination=page_travel)
-
-
-
-
-
-
-
