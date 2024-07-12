@@ -544,11 +544,8 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             if self.appear(stop):
                 break
             if isinstance(click, RuleImage):
-                logger.info("isinstance")
-                # cv2.imshow('s',self.device.image)
-                # cv2.waitKey()
                 if self.appear_then_click(click, interval=interval):
-                    logger.info("appear")
+                    logger.info("%s appear", str(click))
                 continue
             if isinstance(click, RuleClick) and self.click(click, interval=interval):
                 continue

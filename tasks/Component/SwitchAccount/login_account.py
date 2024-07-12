@@ -5,7 +5,6 @@ import cv2
 from module.logger import logger
 from tasks.Component.SwitchAccount.assets import SwitchAccountAssets
 from tasks.base_task import BaseTask
-from module.ocr.utils import Box2XYWH
 
 
 class LoginAccount(BaseTask, SwitchAccountAssets):
@@ -173,7 +172,8 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 if self.appear(self.I_SA_ACCOUNT_DROP_DOWN_CLOSED):
                     if self.ocr_appear(self.O_SA_ACCOUNT_ACCOUNT_SELECTED):
                         break
-                    self.click(self.I_SA_ACCOUNT_DROP_DOWN_CLOSED)
+                    self.ui_click_until_disappear(self.I_SA_ACCOUNT_DROP_DOWN_CLOSED,
+                                                  stop=self.I_SA_ACCOUNT_DROP_DOWN_CLOSED, interval=1.5)
                     continue
 
                 ocrRes = self.O_SA_ACCOUNT_ACCOUNT_LIST.detect_and_ocr(self.device.image)
@@ -182,7 +182,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 if account in [ocrResItem.ocr_text for ocrResItem in ocrRes]:
                     index = [ocrResItem.ocr_text for ocrResItem in ocrRes].index(account)
                     ocrResBoxList = [ocrResItem.box for ocrResItem in ocrRes]
-                    self.O_SA_ACCOUNT_ACCOUNT_LIST.area = [
+                    self.O_SA_ACCOUNT_ACCOUNT_LIST.roi_front = [
                         self.O_SA_ACCOUNT_ACCOUNT_LIST.roi[0] + ocrResBoxList[index][0][
                             0],
                         self.O_SA_ACCOUNT_ACCOUNT_LIST.roi[1] + ocrResBoxList[index][0][

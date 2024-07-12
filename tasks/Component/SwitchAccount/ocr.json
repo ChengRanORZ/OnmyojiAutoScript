@@ -37,8 +37,8 @@
   },
   {
     "itemName": "sa_account_account_selected",
-    "roiFront": "460,280,600,50",
-    "roiBack": "460,280,600,50",
+    "roiFront": "460,280,370,50",
+    "roiBack": "460,280,370,50",
     "mode": "SINGLE",
     "method": "Default",
     "keyword": "",

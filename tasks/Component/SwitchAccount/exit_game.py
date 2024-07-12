@@ -1,6 +1,6 @@
 from tasks.Component.SwitchAccount.assets import SwitchAccountAssets
 from tasks.base_task import BaseTask
-from module.logger import logger,attrlogger
+from module.logger import logger
 
 
 class ExitGame(BaseTask, SwitchAccountAssets):
