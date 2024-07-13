@@ -55,7 +55,6 @@ class LoginHandler(BaseTask, RestartAssets):
             #     logger.error('Network error')
             #     raise RequestHumanTakeover('Network error')
 
-
             # 跳过观看视频
             # if self.ocr_appear_click(self.O_LOGIN_SKIP_1, interval=1):
             #     continue
@@ -68,7 +67,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 logger.info('Close video')
                 continue
             # 右上角的红色的关闭
-            if self.appear_then_click(self.I_LOGIN_RED_CLOSE, interval=0.6):
+            if self.appear_then_click(self.I_LOGIN_RED_CLOSE,  interval=0.6):
                 logger.info('Close red close')
                 continue
             # 左上角的黄色关闭
@@ -83,8 +82,13 @@ class LoginHandler(BaseTask, RestartAssets):
                         logger.info("Close bind phone")
                         break
                 continue
+            # 关闭阴阳师精灵提示
+            if self.appear_then_click(self.I_LOGIN_LOGIN_ONMYOJI_GENIE):
+                logger.info("click onmyoji genie")
+                continue
             # 点击屏幕进入游戏
-            if self.appear(self.I_LOGIN_SPECIFIC_SERVE, interval=0.6) and self.ocr_appear_click(self.O_LOGIN_SPECIFIC_SERVE, interval=0.6):
+            if self.appear(self.I_LOGIN_SPECIFIC_SERVE, interval=0.6) and self.ocr_appear_click(
+                    self.O_LOGIN_SPECIFIC_SERVE, interval=0.6):
                 logger.info('login specific user')
                 continue
             # 点击’进入游戏‘
@@ -94,7 +98,6 @@ class LoginHandler(BaseTask, RestartAssets):
                 continue
 
         return login_success
-
 
     def app_handle_login(self) -> bool:
         for _ in range(2):
@@ -114,8 +117,6 @@ class LoginHandler(BaseTask, RestartAssets):
         logger.critical('Login failed more than 3')
         logger.critical('Onmyoji server may be under maintenance, or you may lost network connection')
         raise RequestHumanTakeover
-
-
 
     def harvest(self):
         """
@@ -194,7 +195,6 @@ class LoginHandler(BaseTask, RestartAssets):
                 timer_harvest.reset()
                 continue
 
-
             # 红色的关闭
             if self.appear_then_click(self.I_UI_BACK_RED, interval=2.3):
                 timer_harvest.reset()
@@ -207,4 +207,3 @@ class LoginHandler(BaseTask, RestartAssets):
                 if timer_harvest.reached():
                     logger.info('No more reward')
                     return
-

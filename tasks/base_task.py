@@ -163,7 +163,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
 
         if appear and interval:
             self.interval_timer[target.name].reset()
-
+        logger.debug("%s %s appear", str(target), '' if appear else "not")
         return appear
 
     def appear_then_click(self,

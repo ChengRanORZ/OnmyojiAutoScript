@@ -1,7 +1,11 @@
 import math
 import time
 
+import copy
 import cv2
+from module.atom.click import RuleClick
+from module.atom.image import RuleImage
+from module.atom.ocr import RuleOcr
 from module.logger import logger
 from tasks.Component.SwitchAccount.assets import SwitchAccountAssets
 from tasks.base_task import BaseTask
@@ -118,32 +122,35 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             for index, item in enumerate(characterNameList):
                 if item != characterName:
                     continue
+                tmp = self.O_SA_SELECT_SVR_CHARACTER_LIST
+                tmpClick= RuleClick(
+                    roi_back=tmp.roi,
+                    roi_front=[
+                        tmp.roi[0] + ocrResBoxList[index][0][0],
+                        tmp.roi[1] + ocrResBoxList[index][0][1],
+                        ocrResBoxList[index][1][0] - ocrResBoxList[index][0][0],
+                        ocrResBoxList[index][2][1] - ocrResBoxList[index][1][1]],
+                    name="tmpClick"
+                )
 
-                self.O_SA_SELECT_SVR_CHARACTER_LIST.area = [
-                    self.O_SA_SELECT_SVR_CHARACTER_LIST.roi[0] + ocrResBoxList[index][0][
-                        0],
-                    self.O_SA_SELECT_SVR_CHARACTER_LIST.roi[1] + ocrResBoxList[index][0][
-                        1],
-                    ocrResBoxList[index][1][0] - ocrResBoxList[index][0][0],
-                    ocrResBoxList[index][2][1] - ocrResBoxList[index][1][1]]
-
-                # 此时O_SA_SELECT_SVR_CHARACTER_LIST内存储的时角色名位置,而点击角色名没有反应
+                # 此时 tmp 内存储的时角色名位置,而点击角色名没有反应
                 # 所以需要获取到对应的服务器图标位置
-                self.O_SA_SELECT_SVR_CHARACTER_LIST.area[1] -= 30
-                self.ui_click_until_disappear(self.O_SA_SELECT_SVR_CHARACTER_LIST, stop=self.I_SA_CHECK_SELECT_SVR_2,
+                tmpClick.roi_front[1] -= 30
+                self.ui_click_until_disappear(tmpClick, stop=self.I_SA_CHECK_SELECT_SVR_2,
                                               interval=1)
-                logger.info("character %s found", characterName)
+                logger.info("character %s found,and clicked svr icon", characterName)
+                # 等待动画完成,如果不等待,会出错
+                # time.sleep(0.3)
                 return True
-
+            logger.warning("========================================================================")
             if lastCharacterNameList == characterNameList:
                 break
             logger.info(f'{characterName} not found,start swipe')
             lastCharacterNameList = characterNameList
             self.swipe(self.S_SA_SVR_SWIPE_LEFT)
             time.sleep(3.5)
-
+        logger.warning("-----------------------")
         self.click(self.C_SA_LOGIN_FORM_CANCEL_SVR_SELECT, 1.5)
-
         return False
 
     def jump2SelectAccount(self):
@@ -173,22 +180,25 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                     if self.ocr_appear(self.O_SA_ACCOUNT_ACCOUNT_SELECTED):
                         break
                     self.ui_click_until_disappear(self.I_SA_ACCOUNT_DROP_DOWN_CLOSED,
-                                                  stop=self.I_SA_ACCOUNT_DROP_DOWN_CLOSED, interval=1.5)
+                                                  interval=1.5)
                     continue
 
+                # 账号列表已打开状态
                 ocrRes = self.O_SA_ACCOUNT_ACCOUNT_LIST.detect_and_ocr(self.device.image)
 
                 # 找到该账号
                 if account in [ocrResItem.ocr_text for ocrResItem in ocrRes]:
                     index = [ocrResItem.ocr_text for ocrResItem in ocrRes].index(account)
                     ocrResBoxList = [ocrResItem.box for ocrResItem in ocrRes]
-                    self.O_SA_ACCOUNT_ACCOUNT_LIST.roi_front = [
+                    tmpObj = self.O_SA_ACCOUNT_ACCOUNT_LIST
+                    self.O_SA_ACCOUNT_ACCOUNT_LIST.area = [
                         self.O_SA_ACCOUNT_ACCOUNT_LIST.roi[0] + ocrResBoxList[index][0][
                             0],
                         self.O_SA_ACCOUNT_ACCOUNT_LIST.roi[1] + ocrResBoxList[index][0][
                             1],
                         ocrResBoxList[index][1][0] - ocrResBoxList[index][0][0],
                         ocrResBoxList[index][2][1] - ocrResBoxList[index][1][1]]
+                    time.sleep(1)
                     self.click(self.O_SA_ACCOUNT_ACCOUNT_LIST)
                     logger.info("account [ %s ] found", account)
                     return True

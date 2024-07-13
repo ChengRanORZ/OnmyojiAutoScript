@@ -177,8 +177,9 @@ flutter_formatter = logging.Formatter(
 # ======================================================================================================================
 #            设置控制台的
 # ======================================================================================================================
-stdout_console = console = Console()
+stdout_console = console = Console(width=200)
 console_hdlr = RichHandler(
+    console=stdout_console,
     show_path=False,
     show_time=False,
     rich_tracebacks=True,

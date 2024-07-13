@@ -194,7 +194,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             return
         while 1:
             self.screenshot()
-            if self.appear(self.I_WQ_TRACE_ONE_ENABLE):
+            # 追踪成功  或  是现世任务 不需要追踪
+            if self.appear(self.I_WQ_TRACE_ONE_ENABLE) or self.appear(self.I_WQ_TRACE_ONE_REALWORLD):
                 break
             if self.appear(self.I_WQ_TRACE_ONE_DISABLE):
                 self.click(self.I_WQ_TRACE_ONE_DISABLE, interval=1.5)
@@ -382,12 +383,10 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                尝试5次 如果邀请失败 等待20s 重新尝试
                阴阳师BUG: 好友明明在线 但邀请界面找不到该好友(好友未接受任何协作任务的情况下)
            '''
-            # 邀请追踪一起吧
             #
-            if self.config.wanted_quests.wanted_quests_config.cooperation_only:
-                self.trace_one(item['inviteBtn'])
             logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             index = 0
+            item['inviteResult']=False
             while index < 5:
                 if self.cooperation_invite(item['inviteBtn'], name):
                     item['inviteResult'] = True
@@ -397,6 +396,9 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 sleep(20) if index < 5 else sleep(0)
                 # NOTE 等待过程如果出现协作邀请 将会卡住 为了防止卡住
                 self.screenshot()
+            # 邀请追踪一起吧,只有邀请成功才追踪
+            if self.config.wanted_quests.wanted_quests_config.cooperation_only and item['inviteResult']:
+                self.trace_one(item['inviteBtn'])
         return ret
 
     def cooperation_invite(self, btn: RuleImage, name: str):
@@ -431,7 +433,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         # 没有找到需要邀请的人,点击取消 返回悬赏封印界面
         if not find:
             self.screenshot()
-            self.click(self.I_WQ_INVITE_CANCEL)
+            self.ui_click_until_disappear(self.I_WQ_INVITE_CANCEL, interval=0.5)
             return False
         #
         self.ui_click_until_disappear(self.I_WQ_INVITE_ENSURE)
