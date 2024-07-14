@@ -58,5 +58,11 @@
     "roiFront": "35,35,55,55",
     "roiBack": "35,35,55,55",
     "description": "游戏庭院内 左上角 头像"
+  },
+  {
+    "itemName": "sa_select_svr_character_list",
+    "roiFront": "205,570,815,40",
+    "roiBack": "205,570,815,40",
+    "description": "选择服务器界面 底部角色名 列表---与ocr.json中同名对象区域一致"
   }
 ]

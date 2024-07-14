@@ -1,7 +1,6 @@
 import math
 import time
 
-import copy
 import cv2
 from module.atom.click import RuleClick
 from module.atom.image import RuleImage
@@ -108,7 +107,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         self.screenshot()
         if self.appear(self.I_SA_CHECK_SELECT_SVR_1) and (not self.appear(self.I_SA_CHECK_SELECT_SVR_2)):
             logger.info("open svr icon")
-            self.ui_click(self.O_SA_SELECT_SVR_CHARACTER_LIST, self.I_SA_CHECK_SELECT_SVR_2, 1.5)
+            self.ui_click(self.C_SA_SELECT_SVR_CHARACTER_LIST, self.I_SA_CHECK_SELECT_SVR_2, 1.5)
 
         self.O_SA_SELECT_SVR_CHARACTER_LIST.keyword = characterName
         lastCharacterNameList = []

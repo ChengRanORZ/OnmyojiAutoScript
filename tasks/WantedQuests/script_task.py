@@ -119,7 +119,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         done_timer = Timer(5)
         while 1:
             self.screenshot()
-            if self.appear(self.I_TARCE_DISENABLE):
+            if self.appear(self.I_TRACE_DISABLE):
                 break
             if self.appear_then_click(self.I_WQ_SEAL, interval=1):
                 continue
@@ -157,9 +157,11 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         # 打开悬赏封印 界面
         while 1:
             self.screenshot()
-            if self.appear(self.I_TRACE_ENABLE) or self.appear(self.I_WQ_TRACE_ONE_DISABLE):
+            if self.appear(self.I_TRACE_ENABLE) or self.appear(self.I_TRACE_DISABLE):
                 break
             if self.appear_then_click(self.I_WQ_SEAL, interval=1):
+                continue
+            if self.appear_then_click(self.I_WQ_DONE, interval=1):
                 continue
             if self.special_main and self.click(self.C_SPECIAL_MAIN, interval=3):
                 logger.info('Click special main left to find wanted quests')
@@ -386,7 +388,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             #
             logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             index = 0
-            item['inviteResult']=False
+            item['inviteResult'] = False
             while index < 5:
                 if self.cooperation_invite(item['inviteBtn'], name):
                     item['inviteResult'] = True

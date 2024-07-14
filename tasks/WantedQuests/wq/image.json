@@ -27,8 +27,8 @@
     "description": "一键追踪"
   },
   {
-    "itemName": "tarce_disenable",
-    "imageName": "wq_tarce_disenable.png",
+    "itemName": "trace_disable",
+    "imageName": "wq_trace_disable.png",
     "roiFront": "1091,586,108,70",
     "roiBack": "1091,586,108,70",
     "method": "Template matching",
