@@ -7,24 +7,11 @@ from module.atom.image import RuleImage
 from module.atom.ocr import RuleOcr
 from module.logger import logger
 from tasks.Component.SwitchAccount.assets import SwitchAccountAssets
+from tasks.Component.SwitchAccount.switch_account_config import AccountInfo
 from tasks.base_task import BaseTask
 
 
 class LoginAccount(BaseTask, SwitchAccountAssets):
-    def run_login(self, account: str, character: str) -> bool:
-        """
-            account         账号-区别于游戏角色
-            svr             服务器
-            character       游戏角色
-            执行登录,要求当前页面必须为登录页面
-            该账号已经登录成功过,客户端已经记住,无需重新输入账号密码
-        @param account: 账号
-        @param character: 账号下角色名
-        @return:    True    登录成功
-                    False   登录失败
-        """
-
-        return True
 
     def get_svr_name(self):
         self.screenshot()
@@ -122,7 +109,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 if item != characterName:
                     continue
                 tmp = self.O_SA_SELECT_SVR_CHARACTER_LIST
-                tmpClick= RuleClick(
+                tmpClick = RuleClick(
                     roi_back=tmp.roi,
                     roi_front=[
                         tmp.roi[0] + ocrResBoxList[index][0][0],
@@ -138,17 +125,14 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 self.ui_click_until_disappear(tmpClick, stop=self.I_SA_CHECK_SELECT_SVR_2,
                                               interval=1)
                 logger.info("character %s found,and clicked svr icon", characterName)
-                # 等待动画完成,如果不等待,会出错
-                # time.sleep(0.3)
                 return True
-            logger.warning("========================================================================")
             if lastCharacterNameList == characterNameList:
                 break
             logger.info(f'{characterName} not found,start swipe')
             lastCharacterNameList = characterNameList
             self.swipe(self.S_SA_SVR_SWIPE_LEFT)
-            time.sleep(3.5)
-        logger.warning("-----------------------")
+            time.sleep(0.5)
+
         self.click(self.C_SA_LOGIN_FORM_CANCEL_SVR_SELECT, 1.5)
         return False
 
@@ -168,9 +152,9 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 continue
         return
 
-    def selectAccount(self, account: str):
-        self.O_SA_ACCOUNT_ACCOUNT_LIST.keyword = account
-        self.O_SA_ACCOUNT_ACCOUNT_SELECTED.keyword = account
+    def selectAccount(self, accountInfo: AccountInfo):
+        self.O_SA_ACCOUNT_ACCOUNT_LIST.keyword = accountInfo.account
+        self.O_SA_ACCOUNT_ACCOUNT_SELECTED.keyword = accountInfo.account
         # 正常情况一次就行,但防不住OCR搞幺蛾子 保险起见 多来几次吧 反正挂机不差这点
         for i in range(3):
             while 1:
@@ -186,8 +170,11 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 ocrRes = self.O_SA_ACCOUNT_ACCOUNT_LIST.detect_and_ocr(self.device.image)
 
                 # 找到该账号
-                if account in [ocrResItem.ocr_text for ocrResItem in ocrRes]:
-                    index = [ocrResItem.ocr_text for ocrResItem in ocrRes].index(account)
+                for index, ocr_account in enumerate([ocrResItem.ocr_text for ocrResItem in ocrRes]):
+                    if not accountInfo.is_account_alias(ocr_account):
+                        continue
+                    # if accountInfo.account in [ocrResItem.ocr_text for ocrResItem in ocrRes]:
+                    #     index = [ocrResItem.ocr_text for ocrResItem in ocrRes].index(accountInfo.account)
                     ocrResBoxList = [ocrResItem.box for ocrResItem in ocrRes]
                     tmpObj = self.O_SA_ACCOUNT_ACCOUNT_LIST
                     self.O_SA_ACCOUNT_ACCOUNT_LIST.area = [
@@ -199,15 +186,15 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                         ocrResBoxList[index][2][1] - ocrResBoxList[index][1][1]]
                     time.sleep(1)
                     self.click(self.O_SA_ACCOUNT_ACCOUNT_LIST)
-                    logger.info("account [ %s ] found", account)
+                    logger.info("account [ %s ] found", accountInfo.account)
                     return True
 
                 # 未找到该账号
                 if self.appear(self.I_SA_ACCOUNT_DROP_DOWN_ADD_ACCOUNT):
                     break
                 self.swipe(self.S_SA_ACCOUNT_LIST_UP, 1.5)
-                time.sleep(3.5)
-        logger.info("account [ %s ] not found ", account)
+                time.sleep(0.5)
+        logger.info("account [ %s ] not found ", accountInfo.account)
         return False
 
     # def loginSubmit(self, appleOrAndroid: bool):
@@ -232,18 +219,11 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
     #         self.ui_click_until_disappear(self.I_SA_LOGIN_FORM_ANDROID, 1)
     #     return True
 
-    def login(self, character: str, svr: str = None, account: str = None, appleOrAndroid: bool = True) -> bool:
+    def login(self, accountInfo: AccountInfo) -> bool:
         """
 
-        @param character:   角色名字
-        @type character:
-        @param svr:         角色所在服务器(可选)
-        @type svr:
-        @param account:     账号(可选)
-        @type account:
-        @param appleOrAndroid:  角色所属平台 安卓/苹果(可选)
-        @type appleOrAndroid:   False           Apple
-                                True            Android
+        @param accountInfo:
+        @type accountInfo:
         @return:    True    点击了"进入游戏"按钮
                     False   未找到相应角色
         @rtype:bool
@@ -251,14 +231,14 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         self.screenshot()
         #
         if not (self.appear(self.I_CHECK_LOGIN_FORM) or self.appear(self.I_SA_NETEASE_GAME_LOGO)):
-            logger.error("Unknown Page,%s %s Login Failed", character, svr)
+            logger.error("Unknown Page,%s %s Login Failed", accountInfo.character, accountInfo.svr)
             return False
 
         #
         isAccountLogon = False
         isCharacterSelected = False
-        self.O_SA_ACCOUNT_ACCOUNT_SELECTED.keyword = account
-        self.O_SA_LOGIN_FORM_USER_CENTER_ACCOUNT.keyword = account
+        self.O_SA_ACCOUNT_ACCOUNT_SELECTED.keyword = accountInfo.account
+        self.O_SA_LOGIN_FORM_USER_CENTER_ACCOUNT.keyword = accountInfo.account
         while 1:
             self.screenshot()
             # 处于 选择服务器界面 直接点击空白区域退出该界面 进入切换账号流程
@@ -268,19 +248,19 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
 
             # 处于选择 苹果安卓界面
             if self.appear(self.I_SA_LOGIN_FORM_APPLE):
-                btn = self.I_SA_LOGIN_FORM_ANDROID if appleOrAndroid else self.I_SA_LOGIN_FORM_APPLE
+                btn = self.I_SA_LOGIN_FORM_ANDROID if accountInfo.appleOrAndroid else self.I_SA_LOGIN_FORM_APPLE
                 self.ui_click_until_disappear(btn)
                 isAccountLogon = True
                 continue
             # 处于选择账号界面
             if self.appear(self.I_SA_NETEASE_GAME_LOGO) and not self.appear(self.I_SA_LOGIN_FORM_APPLE):
-                if not account:
+                if not accountInfo.account:
                     logger.error("param account is None,cannot switch account")
                     return False
                 # 当前选择账号不是account
                 if not self.ocr_appear(self.O_SA_ACCOUNT_ACCOUNT_SELECTED):
                     # 没有找到account
-                    if not self.selectAccount(account):
+                    if not self.selectAccount(accountInfo):
                         self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_ACCOUNT_CLOSE_BTN,
                                                       stop=self.I_SA_NETEASE_GAME_LOGO)
                         return False
@@ -292,7 +272,8 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 # 如果当前已登录用户就是account
                 ocrRes = self.O_SA_LOGIN_FORM_USER_CENTER_ACCOUNT.ocr_single(self.device.image)
                 # NOTE 由于邮箱账号@符号极易被误识别为其他,故对账号信息做预处理 便于比对
-                if (account is None) or account == "" or ocrRes.startswith(self.preprocessAccount(account)):
+                if (accountInfo.account is None) or accountInfo.account == "" or ocrRes.startswith(
+                        self.preprocessAccount(accountInfo.account)) or accountInfo.is_account_alias(ocrRes):
                     isAccountLogon = True
                     self.click(self.C_SA_LOGIN_FORM_USER_CENTER_CLOSE_BTN, 1)
                     continue
@@ -309,7 +290,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                     continue
 
                 # 已登录 查找对应角色
-                if not isCharacterSelected and self.switch_character(character):
+                if not isCharacterSelected and self.switch_character(accountInfo.character):
                     isCharacterSelected = True
                     continue
                 break
@@ -317,29 +298,18 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
 
         # 切换角色失败 /未找到该角色
         # 尝试使用 选择服务器方式
-        if isAccountLogon and not isCharacterSelected and svr is not None and svr != "":
-            logger.info("try to find character with svrName %s", svr)
-            isCharacterSelected = self.switch_svr(svr)
+        if isAccountLogon and not isCharacterSelected and accountInfo.svr is not None and accountInfo.svr != "":
+            logger.info("try to find character with svrName %s", accountInfo.svr)
+            isCharacterSelected = self.switch_svr(accountInfo.svr)
         if isAccountLogon and isCharacterSelected:
             # 成功登录账号 找到角色
             self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_ENTER_GAME_BTN, stop=self.I_CHECK_LOGIN_FORM)
-            logger.info("character %s-%s account:%s %s login Success", character, svr, account,
-                        'Android' if appleOrAndroid else 'Apple')
+            logger.info("character %s-%s account:%s %s login Success", accountInfo.character, accountInfo.svr,
+                        accountInfo.account,
+                        'Android' if accountInfo.appleOrAndroid else 'Apple')
             return True
 
-        logger.error("character %s-%s account:%s %s login Failed", character, svr, account,
-                     'Android' if appleOrAndroid else 'Apple')
+        logger.error("character %s-%s account:%s %s login Failed", accountInfo.character, accountInfo.svr,
+                     accountInfo.account,
+                     'Android' if accountInfo.appleOrAndroid else 'Apple')
         return False
-
-    @staticmethod
-    def preprocessAccount(account: str):
-        """
-            预处理账号信息 便于比对
-            邮箱账号        去除@后面的部分 防止@被识别为其他
-        @param account:
-        @type account:
-        @return:
-        @rtype:
-        """
-
-        return account.split('@')[0]
