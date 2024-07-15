@@ -272,8 +272,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 # 如果当前已登录用户就是account
                 ocrRes = self.O_SA_LOGIN_FORM_USER_CENTER_ACCOUNT.ocr_single(self.device.image)
                 # NOTE 由于邮箱账号@符号极易被误识别为其他,故对账号信息做预处理 便于比对
-                if (accountInfo.account is None) or accountInfo.account == "" or ocrRes.startswith(
-                        self.preprocessAccount(accountInfo.account)) or accountInfo.is_account_alias(ocrRes):
+                if (accountInfo.account is None) or accountInfo.account == "" or accountInfo.is_account_alias(ocrRes):
                     isAccountLogon = True
                     self.click(self.C_SA_LOGIN_FORM_USER_CENTER_CLOSE_BTN, 1)
                     continue

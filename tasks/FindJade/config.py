@@ -3,7 +3,6 @@ from pydantic import Field, BaseModel
 from tasks.Component.SwitchAccount.switch_account_config import AccountInfo
 from tasks.Component.config_base import ConfigBase
 from tasks.Component.config_scheduler import Scheduler
-from typing import List
 
 defaultAccountInfo = AccountInfo()
 defaultAccountInfo.account = "dAccount"
@@ -15,7 +14,8 @@ defaultAccountInfo.last_complete_time = datetime(1970, 1, 1, 1, 1, 1)
 
 
 class FindJadeConfig(BaseModel):
-    find_jade_accounts_info: List[AccountInfo] = Field(default=[defaultAccountInfo],
+    jade_to_list: list[str] = Field(default=[], description="jade_to_list_help")
+    find_jade_accounts_info: list[AccountInfo] = Field(default=[defaultAccountInfo],
                                                        description='find_jade_accounts_info_help')
 
 
