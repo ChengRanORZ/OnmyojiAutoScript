@@ -355,11 +355,10 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         self.invite_random(self.I_WQ_INVITE_2)
         self.invite_random(self.I_WQ_INVITE_3)
 
-    def all_cooperation_invite(self, name: str):
+    def all_cooperation_invite(self):
         """
             所有的协作任务依次邀请
             如果配置了只完成协作任务 还会将该任务设置为追踪
-        @param name: 被邀请的朋友名
         @return:
 
         """
@@ -386,9 +385,10 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                阴阳师BUG: 好友明明在线 但邀请界面找不到该好友(好友未接受任何协作任务的情况下)
            '''
             #
-            logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             index = 0
             item['inviteResult'] = False
+            name = self.get_invite_vip_name(item['type'])
+            logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             while index < 5:
                 if self.cooperation_invite(item['inviteBtn'], name):
                     item['inviteResult'] = True
@@ -479,6 +479,12 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         if main_type == MainType.COSTUME_MAIN_3:
             return True
         return False
+
+    def need_invite_vip(self):
+        return self.config.wanted_quests.wanted_quests_config.invite_friend_name is not None
+
+    def get_invite_vip_name(self, type: CooperationType):
+        return self.config.wanted_quests.wanted_quests_config.invite_friend_name
 
 
 if __name__ == '__main__':
