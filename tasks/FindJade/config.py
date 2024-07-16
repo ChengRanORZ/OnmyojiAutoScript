@@ -1,27 +1,65 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import Field, BaseModel
 from tasks.Component.SwitchAccount.switch_account_config import AccountInfo
 from tasks.Component.config_base import ConfigBase
 from tasks.Component.config_scheduler import Scheduler
 from module.config.utils import write_file
+from tasks.WantedQuests.config import CooperationSelectMaskDescription, CooperationSelectMask, CooperationType
 
-defaultAccountInfo = AccountInfo()
-defaultAccountInfo.account = "dAccount"
-defaultAccountInfo.accountAlias = 'dAcc0unt#dAccOunt'
-defaultAccountInfo.svr = "dSvr"
-defaultAccountInfo.character = "dCharacter"
-defaultAccountInfo.appleOrAndroid = True
-defaultAccountInfo.last_complete_time = datetime(1970, 1, 1, 1, 1, 1)
+
+class FindJadeConfig(BaseModel):
+    find_jade_json_path: str = Field(default='./config/findjade/find_jade.json', description='json conf file path')
+    # extra: str = Field(default='')
 
 
 class FindJade(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
-    find_jade_json_path: str = Field(default="./config/findjade/find_jade.json", description="json conf file path")
+    find_jade_config: FindJadeConfig = Field(default_factory=FindJadeConfig)
+
+
+class InviteInfo(BaseModel):
+    # 被邀请人员昵称
+    name: str = "defaultName"
+    default_invite_type: CooperationSelectMaskDescription
+    # 协作任务类型   上次邀请时间
+    invited_types: list[(CooperationType, datetime)]
+
+    def need_invite(self, ctype: CooperationType):
+        if not ctype & CooperationSelectMask[self.default_invite_type.value]:
+            return False
+        # 判断是否邀请过
+        lastTime = self.invited_types[ctype]
+        now = datetime.now()
+        if now - lastTime > timedelta(hours=13):
+            return True
+        if (lastTime.hour >= 18 or lastTime.hour < 5) and (18 > now.hour >= 5):
+            return True
+        if (5 <= lastTime.hour < 18) and now.hour >= 18:
+            return True
+        return False
 
 
 class FindJadeJSON(BaseModel):
-    jade_to_list: str
     find_jade_accounts_info: list[AccountInfo]
+    invite_info_list: list[InviteInfo]
+
+    def get_invite_name(self, ctype: CooperationType):
+        for info in self.invite_info_list:
+            if info.need_invite(ctype):
+                return info.name
+        return ""
+
+    def update_invite_history(self, ctype: CooperationType, name: str):
+        # 更新邀请信息
+        for info in self.invite_info_list:
+            if info.name != name:
+                continue
+            info.invited_types[ctype] = datetime.now()
+
+    def update_account_login_history(self, account: AccountInfo):
+        accountInfoList = self.find_jade_accounts_info
+        
+        pass
 
     def save2file(self, conf_path):
         write_file(conf_path, self.dict())

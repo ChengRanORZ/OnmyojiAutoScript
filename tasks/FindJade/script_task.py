@@ -10,6 +10,7 @@ from module.device.device import Device
 from module.exception import TaskEnd
 from pathlib import Path
 from tasks.Component.SwitchAccount.switch_account import SwitchAccount
+from tasks.FindJade import WantedQuestsEx
 from tasks.FindJade.assets import FindJadeAssets
 from tasks.FindJade.config import AccountInfo, FindJadeJSON
 from tasks.GameUi.game_ui import GameUi
@@ -36,9 +37,12 @@ class ScriptTask(GameUi, FindJadeAssets):
             suc = SwitchAccount(self.config, self.device, accountInfo).switchAccount()
             if not suc:
                 continue
-            method = self.WantedQuestScript()
+            #
+            wq = self.CreatObjectFromModule("WantedQuests", config=self.config, device=self.device)
+            wq.fade_conf = self.fade_conf
+
             try:
-                method()
+                wq.run()
             except TaskEnd as e:
                 logger.warning("%s-%s TaskEnd", accountInfo.character, accountInfo.svr)
                 # 更新配置文件中的时间
@@ -89,36 +93,40 @@ class ScriptTask(GameUi, FindJadeAssets):
             return True
         return False
 
-    def WantedQuestScript(self):
+    def CreatObjectFromModule(self, task_name: str, **kwargs):
         module_name = 'script_task'
-        module_path = str(Path.cwd() / 'tasks' / 'WantedQuests' / (module_name + '.py'))
-        logger.info(f'module_path: {module_path}, module_name: {module_name}')
+        from pathlib import Path
+        module_path = str(Path.cwd() / 'tasks' / task_name / (module_name + '.py'))
+
         spec = importlib.util.spec_from_file_location(module_name, module_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        return module.ScriptTask(config=self.config, device=self.device).run
+        WQEX = type("WQEX", (module.ScriptTask,), {
+            "need_invite_vip": WantedQuestsEx.need_invite_vip,
+            "get_invite_vip_name": WantedQuestsEx.get_invite_vip_name,
+            "next_run": WantedQuestsEx.next_run
+        })
+        wq = WQEX(**kwargs)
+        return wq
 
-class A():
-    def geta(self):
-        return "a"
+    def save_jade_json(self):
+        conf_path = self.config.find_jade.find_jade_config.find_jade_json_path
+        self.fade_conf.save2file(conf_path)
 
-    def p(self):
-        print(self.geta())
-class B(A):
-    def geta(self):
-        return "A"
 
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    tmp=B()
-    tmp.p()
-
     c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
-    t.fade_conf = t.parse()
-    t.fade_conf.save2file("F:/download/1.json")
-    # t.run()
+    # wq = t.CreatObjectFromModule("WantedQuests", config=t.config, device=t.device)
+    # wq.need_invite_vip = WantedQuestsEx.need_invite_vip
+    # wq.get_invite_vip_name = WantedQuestsEx.get_invite_vip_name
+
+    # print(wq.need_invite_vip())
+    # t.fade_conf = t.parse()
+    # t.fade_conf.save2file("F:/download/1.json")
+    t.run()

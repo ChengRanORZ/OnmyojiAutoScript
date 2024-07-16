@@ -131,7 +131,8 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             logger.info(f'{characterName} not found,start swipe')
             lastCharacterNameList = characterNameList
             self.swipe(self.S_SA_SVR_SWIPE_LEFT)
-            time.sleep(0.5)
+            # 等待滑动动画完成
+            time.sleep(1)
 
         self.click(self.C_SA_LOGIN_FORM_CANCEL_SVR_SELECT, 1.5)
         return False

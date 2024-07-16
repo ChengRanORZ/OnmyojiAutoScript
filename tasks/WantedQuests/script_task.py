@@ -142,8 +142,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         # 存在协作任务则邀请
         self.screenshot()
         if self.appear(self.I_WQ_INVITE_1) or self.appear(self.I_WQ_INVITE_2) or self.appear(self.I_WQ_INVITE_3):
-            if self.config.wanted_quests.wanted_quests_config.invite_friend_name:
-                self.all_cooperation_invite(self.config.wanted_quests.wanted_quests_config.invite_friend_name)
+            if self.need_invite_vip():
+                self.all_cooperation_invite()
             else:
                 self.invite_five()
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
@@ -179,7 +179,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         #     self.trace_one(self.I_WQ_INVITE_3)
 
         # 追踪任务 并邀请
-        self.all_cooperation_invite(self.config.wanted_quests.wanted_quests_config.invite_friend_name)
+        self.all_cooperation_invite()
 
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         self.ui_goto(page_exploration)
@@ -399,8 +399,10 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 # NOTE 等待过程如果出现协作邀请 将会卡住 为了防止卡住
                 self.screenshot()
             # 邀请追踪一起吧,只有邀请成功才追踪
-            if self.config.wanted_quests.wanted_quests_config.cooperation_only and item['inviteResult']:
-                self.trace_one(item['inviteBtn'])
+            if item['inviteResult']:
+                self.invite_success_callback(item['type'], name)
+                if self.config.wanted_quests.wanted_quests_config.cooperation_only and item['inviteResult']:
+                    self.trace_one(item['inviteBtn'])
         return ret
 
     def cooperation_invite(self, btn: RuleImage, name: str):
@@ -481,10 +483,20 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         return False
 
     def need_invite_vip(self):
-        return self.config.wanted_quests.wanted_quests_config.invite_friend_name is not None
+        return bool(self.config.wanted_quests.wanted_quests_config.invite_friend_name)
 
-    def get_invite_vip_name(self, type: CooperationType):
+    def get_invite_vip_name(self, ctype: CooperationType):
         return self.config.wanted_quests.wanted_quests_config.invite_friend_name
+
+    def invite_success_callback(self, ctype: CooperationType, name):
+        """
+           邀请成功回调
+        @param ctype:
+        @type ctype:
+        @param name:
+        @type name:
+        """
+        pass
 
 
 if __name__ == '__main__':
