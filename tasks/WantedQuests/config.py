@@ -20,6 +20,9 @@ class CooperationType(int, Enum):
     Food = 4  # 狗/猫粮协作
     Sushi = 8  # 体力协作
 
+    def __hash__(self):
+        return self.value
+
 
 class CooperationSelectMask(int, Enum):
     """

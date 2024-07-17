@@ -29,8 +29,9 @@ class InviteInfo(BaseModel):
             return False
         # 判断是否邀请过
         if ctype not in self.invited_types:
+            self.invited_types.setdefault(ctype, datetime(1970, 1, 1))
             return True
-        lastTime = self.invited_types[ctype]
+        lastTime = self.invited_types.get(ctype, default=datetime(1970, 1, 1))
         now = datetime.now()
         if now - lastTime > timedelta(hours=13):
             return True
@@ -56,7 +57,7 @@ class FindJadeJSON(BaseModel):
         for info in self.invite_info_list:
             if info.name != name:
                 continue
-            info.invited_types[ctype] = datetime.now()
+            info.invited_types.setdefault(ctype, datetime.now())
 
     def update_account_login_history(self, account: AccountInfo):
         accountInfoList = self.find_jade_accounts_info

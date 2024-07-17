@@ -132,7 +132,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             lastCharacterNameList = characterNameList
             self.swipe(self.S_SA_SVR_SWIPE_LEFT)
             # 等待滑动动画完成
-            time.sleep(1)
+            time.sleep(1.5)
 
         self.click(self.C_SA_LOGIN_FORM_CANCEL_SVR_SELECT, 1.5)
         return False

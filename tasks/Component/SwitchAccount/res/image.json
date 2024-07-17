@@ -11,8 +11,8 @@
   {
     "itemName": "sa_user_center",
     "imageName": "sa_user_center.png",
-    "roiFront": "190,390,330,140",
-    "roiBack": "190,390,330,140",
+    "roiFront": "190,390,330,200",
+    "roiBack": "190,390,330,200",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "游戏内-点击头像弹出的设置界面-左侧-用户中心按钮"

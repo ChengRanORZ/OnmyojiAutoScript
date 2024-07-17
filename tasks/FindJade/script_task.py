@@ -64,7 +64,6 @@ class ScriptTask(GameUi, FindJadeAssets):
         @rtype:
         """
         conf_path = self.config.find_jade.find_jade_config.find_jade_json_path
-        conf_path = ".\\config\\findjade\\findjade.json"
         jsonData = read_file(conf_path)
         fjconf = FindJadeJSON(**jsonData)
         return fjconf
