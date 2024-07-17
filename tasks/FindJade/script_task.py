@@ -15,7 +15,7 @@ from tasks.FindJade.assets import FindJadeAssets
 from tasks.FindJade.config import AccountInfo, FindJadeJSON
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_main
-from tasks.WantedQuests.config import CooperationSelectMaskDescription
+from tasks.WantedQuests.config import CooperationSelectMaskDescription, CooperationType
 from tasks.base_task import BaseTask
 from typing import List
 from module.logger import logger
@@ -46,10 +46,8 @@ class ScriptTask(GameUi, FindJadeAssets):
             except TaskEnd as e:
                 logger.warning("%s-%s TaskEnd", accountInfo.character, accountInfo.svr)
                 # 更新配置文件中的时间
-                accountInfoList = self.fade_conf.find_jade_accounts_info
-                index = [item.character for item in accountInfoList].index(accountInfo.character)
-                accountInfoList[index].last_complete_time = datetime.now()
-                self.fade_conf.save2file(self.config.find_fade.find_fade_json_path)
+                self.fade_conf.update_account_login_history(accountInfo)
+                self.fade_conf.save2file(self.config.find_jade.find_jade_config.find_jade_json_path)
                 continue
 
         pass
@@ -105,7 +103,8 @@ class ScriptTask(GameUi, FindJadeAssets):
         WQEX = type("WQEX", (module.ScriptTask,), {
             "need_invite_vip": WantedQuestsEx.need_invite_vip,
             "get_invite_vip_name": WantedQuestsEx.get_invite_vip_name,
-            "next_run": WantedQuestsEx.next_run
+            "next_run": WantedQuestsEx.next_run,
+            "invite_success_callback": WantedQuestsEx.invite_success_callback
         })
         wq = WQEX(**kwargs)
         return wq
@@ -125,6 +124,10 @@ if __name__ == '__main__':
     # wq = t.CreatObjectFromModule("WantedQuests", config=t.config, device=t.device)
     # wq.need_invite_vip = WantedQuestsEx.need_invite_vip
     # wq.get_invite_vip_name = WantedQuestsEx.get_invite_vip_name
+    # t.fade_conf = t.parse()
+    #
+    # t.fade_conf.update_invite_history(CooperationType.Jade, "却把烟花嗅")
+    # t.fade_conf.save2file(".\\config\\findjade\\findjade.json")
 
     # print(wq.need_invite_vip())
     # t.fade_conf = t.parse()

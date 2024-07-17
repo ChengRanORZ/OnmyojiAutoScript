@@ -22,12 +22,14 @@ class InviteInfo(BaseModel):
     name: str = "defaultName"
     default_invite_type: CooperationSelectMaskDescription
     # 协作任务类型   上次邀请时间
-    invited_types: list[(CooperationType, datetime)]
+    invited_types: dict
 
     def need_invite(self, ctype: CooperationType):
         if not ctype & CooperationSelectMask[self.default_invite_type.value]:
             return False
         # 判断是否邀请过
+        if ctype not in self.invited_types:
+            return True
         lastTime = self.invited_types[ctype]
         now = datetime.now()
         if now - lastTime > timedelta(hours=13):
@@ -58,8 +60,10 @@ class FindJadeJSON(BaseModel):
 
     def update_account_login_history(self, account: AccountInfo):
         accountInfoList = self.find_jade_accounts_info
-        
-        pass
+        for info in accountInfoList:
+            if info.character != account.character or info.svr != account.svr:
+                continue
+            info.last_complete_time = datetime.now()
 
     def save2file(self, conf_path):
         write_file(conf_path, self.dict())

@@ -9,16 +9,10 @@ def need_invite_vip(self):
 def get_invite_vip_name(self, ctype: CooperationType):
     if not self.fade_conf:
         return ""
-    self.fade_conf.get_invite_name(ctype)
-
-    if type == CooperationType.Jade:
-        return "子曾经日"
-    else:
-        return "粘贴"
-    pass
+    return self.fade_conf.get_invite_name(ctype)
 
 
-def next_run():
+def next_run(self):
     pass
 
 

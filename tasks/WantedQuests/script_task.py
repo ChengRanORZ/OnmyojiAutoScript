@@ -31,7 +31,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
     def run(self):
         con = self.config
         preSuc = False
-        if self.config.wanted_quests.wanted_quests_config.cooperation_only:
+        if self.is_cooperation_only():
             preSuc = self.pre_work_cooperation_only()
         else:
             preSuc = self.pre_work()
@@ -401,7 +401,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             # 邀请追踪一起吧,只有邀请成功才追踪
             if item['inviteResult']:
                 self.invite_success_callback(item['type'], name)
-                if self.config.wanted_quests.wanted_quests_config.cooperation_only and item['inviteResult']:
+                if self.config.wanted_quests.wanted_quests_config.cooperation_only:
+                    logger.info("start trace_one")
                     self.trace_one(item['inviteBtn'])
         return ret
 
@@ -487,6 +488,9 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
 
     def get_invite_vip_name(self, ctype: CooperationType):
         return self.config.wanted_quests.wanted_quests_config.invite_friend_name
+
+    def is_cooperation_only(self):
+        return self.config.wanted_quests.wanted_quests_config.cooperation_only
 
     def invite_success_callback(self, ctype: CooperationType, name):
         """
