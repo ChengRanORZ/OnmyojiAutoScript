@@ -5,6 +5,7 @@ import threading
 from module.logger import logger
 from module.server.setting import State
 
+
 def fun(ev: threading.Event):
     import argparse
     import asyncio
@@ -54,13 +55,19 @@ def fun(ev: threading.Event):
     logger.attr("Port", port)
     logger.attr("Reload", ev is not None)
 
+    logger.hr("PATCHING")
+    from tasks.base_task import BaseTask
+    if getattr(BaseTask, "appear_then_click_origin", None) is None:
+        setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
+        from mypatch import appear_then_click_CRORZ
+        setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
+
+
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
                 port=port,
                 factory=True)
 
 
-
 if __name__ == "__main__":
     fun(None)
-

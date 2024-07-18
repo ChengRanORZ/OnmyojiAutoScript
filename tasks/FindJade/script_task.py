@@ -103,7 +103,8 @@ class ScriptTask(GameUi, FindJadeAssets):
             "need_invite_vip": WantedQuestsEx.need_invite_vip,
             "get_invite_vip_name": WantedQuestsEx.get_invite_vip_name,
             "next_run": WantedQuestsEx.next_run,
-            "invite_success_callback": WantedQuestsEx.invite_success_callback
+            "invite_success_callback": WantedQuestsEx.invite_success_callback,
+            "get_config":WantedQuestsEx.get_config
         })
         wq = WQEX(**kwargs)
         return wq
@@ -117,6 +118,14 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
+    from tasks.base_task import BaseTask
+
+    if getattr(BaseTask, "appear_then_click_origin", None) is None:
+        setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
+
+        from mypatch import appear_then_click_CRORZ
+        setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
+
     c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
@@ -124,6 +133,9 @@ if __name__ == '__main__':
     # wq.need_invite_vip = WantedQuestsEx.need_invite_vip
     # wq.get_invite_vip_name = WantedQuestsEx.get_invite_vip_name
     # t.fade_conf = t.parse()
+    # t.fade_conf.update_invite_history(CooperationType.Jade,"却把烟花嗅")
+    # t.fade_conf.save2file(c.model.find_jade.find_jade_config.find_jade_json_path)
+    # t.parse()
     #
     # t.fade_conf.update_invite_history(CooperationType.Jade, "却把烟花嗅")
     # t.fade_conf.save2file(".\\config\\findjade\\findjade.json")

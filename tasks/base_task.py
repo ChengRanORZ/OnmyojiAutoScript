@@ -348,7 +348,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         if interval:
             self.interval_timer[click.name].reset()
             return True
-        return False
+        return True
 
     def ocr_appear(self, target: RuleOcr, interval: float = None) -> bool:
         """
@@ -527,7 +527,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
 
         return True
 
-    def ui_click(self, click, stop=None, interval=1):
+    def ui_click(self, click, stop, interval=1):
         """
         循环的一个操作，直到出现stop
         :param click:
@@ -535,17 +535,11 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         :parm interval
         :return:
         """
-        if stop is None:
-            stop = click
         while 1:
             self.screenshot()
-            # cv2.imshow('s',self.device.image)
-            # cv2.waitKey()
             if self.appear(stop):
                 break
-            if isinstance(click, RuleImage):
-                if self.appear_then_click(click, interval=interval):
-                    logger.info("%s appear", str(click))
+            if isinstance(click, RuleImage) and self.appear_then_click(click, interval=interval):
                 continue
             if isinstance(click, RuleClick) and self.click(click, interval=interval):
                 continue

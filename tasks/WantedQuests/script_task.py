@@ -31,7 +31,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
     def run(self):
         con = self.config
         preSuc = False
-        if self.is_cooperation_only():
+        if (self.get_config()).cooperation_only:
             preSuc = self.pre_work_cooperation_only()
         else:
             preSuc = self.pre_work()
@@ -371,7 +371,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             logger.info("no Cooperation found")
             return False
         typeMask = 15
-        typeMask = CooperationSelectMask[self.config.wanted_quests.wanted_quests_config.cooperation_type.value]
+        typeMask = CooperationSelectMask[(self.get_config()).cooperation_type.value]
         for item in ret:
             # 该任务是需要邀请的任务类型
             if not (item['type'] & typeMask):
@@ -401,7 +401,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             # 邀请追踪一起吧,只有邀请成功才追踪
             if item['inviteResult']:
                 self.invite_success_callback(item['type'], name)
-                if self.config.wanted_quests.wanted_quests_config.cooperation_only:
+                if (self.get_config()).cooperation_only:
                     logger.info("start trace_one")
                     self.trace_one(item['inviteBtn'])
         return ret
@@ -414,6 +414,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         @return:
         """
         self.ui_click(btn, self.I_WQ_INVITE_ENSURE, interval=2.5)
+        # 等待好友列表加载
+        sleep(1.5)
 
         # 选人
         self.O_WQ_INVITE_COLUMN_1.keyword = name
@@ -483,14 +485,14 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             return True
         return False
 
+    def get_config(self):
+        return self.config.wanted_quests.wanted_quests_config
+
     def need_invite_vip(self):
-        return bool(self.config.wanted_quests.wanted_quests_config.invite_friend_name)
+        return bool(self.get_config().invite_friend_name)
 
     def get_invite_vip_name(self, ctype: CooperationType):
-        return self.config.wanted_quests.wanted_quests_config.invite_friend_name
-
-    def is_cooperation_only(self):
-        return self.config.wanted_quests.wanted_quests_config.cooperation_only
+        return self.get_config().invite_friend_name
 
     def invite_success_callback(self, ctype: CooperationType, name):
         """

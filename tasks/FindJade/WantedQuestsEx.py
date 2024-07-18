@@ -1,5 +1,5 @@
 import importlib
-from tasks.WantedQuests.config import WantedQuests, CooperationType
+from tasks.WantedQuests.config import WantedQuests, CooperationType, WantedQuestsConfig
 
 
 def need_invite_vip(self):
@@ -21,4 +21,10 @@ def invite_success_callback(self, ctype: CooperationType, name: str):
         return
     self.fade_conf.update_invite_history(ctype, name)
 
-    pass
+
+def get_config(self):
+    config=WantedQuestsConfig()
+    config.invite_friend_name="default"
+    config.cooperation_only=True
+    config.cooperation_type=self.fade_conf.get_cooperation_type_mask()
+    return config
