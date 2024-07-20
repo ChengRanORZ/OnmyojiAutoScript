@@ -67,7 +67,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 logger.info('Close video')
                 continue
             # 右上角的红色的关闭
-            if self.appear_then_click(self.I_LOGIN_RED_CLOSE,  interval=0.6):
+            if self.appear_then_click(self.I_LOGIN_RED_CLOSE, interval=0.6):
                 logger.info('Close red close')
                 continue
             # 左上角的黄色关闭
@@ -82,8 +82,10 @@ class LoginHandler(BaseTask, RestartAssets):
                         logger.info("Close bind phone")
                         break
                 continue
-            if self.appear(self.I_INVITE_POPUP_CLOSE):
-
+            # 关闭各种邀请弹窗(主要时结界卡寄养邀请)
+            from tasks.Component.GeneralInvite.assets import GeneralInviteAssets as gia
+            if self.appear_then_click(gia.I_I_REJECT, interval=0.8):
+                logger.info("reject invites")
                 continue
             # 关闭阴阳师精灵提示
             if self.appear_then_click(self.I_LOGIN_LOGIN_ONMYOJI_GENIE):
