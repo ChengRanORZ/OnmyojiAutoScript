@@ -14,19 +14,6 @@ from module.logger import logger
 
 class SwitchAccount(LoginAccount, ExitGame, GameUi, SwitchAccountAssets):
 
-    # def __init__(self, config: Config, device: Device,
-    #              toCharacter: str, toSvr: str = None, toAccount: str = None, fromAppleOrAndroid=True,
-    #              fromAccount=None, fromSvr: str = None, fromCharacter: str = None, toAppleOrAndroid=True):
-    #     super().__init__(config, device)
-    #     self.fromCharacter = fromCharacter
-    #     self.fromSvr = fromSvr
-    #     self.fromAccount = fromAccount
-    #     self.fromAppleOrAndroid = fromAppleOrAndroid
-    #     self.toAccount = toAccount
-    #     self.toSvr = toSvr
-    #     self.toCharacter = toCharacter
-    #     self.toAppleOrAndroid = toAppleOrAndroid
-
     def __init__(self, config: Config, device: Device, to: AccountInfo, frm: AccountInfo = None):
         super().__init__(config, device)
         self.toAccountInfo = to

@@ -1,23 +1,13 @@
-import sys
-
 import importlib
 from datetime import datetime, timedelta
-from dev_tools.assets_test import detect_image
-from module.base.utils import load_module
-from module.config.config import Config
 from module.config.utils import read_file
-from module.device.device import Device
 from module.exception import TaskEnd
-from pathlib import Path
 from tasks.Component.SwitchAccount.switch_account import SwitchAccount
 from tasks.FindJade import WantedQuestsEx
 from tasks.FindJade.assets import FindJadeAssets
 from tasks.FindJade.config import AccountInfo, FindJadeJSON
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main
-from tasks.WantedQuests.config import CooperationSelectMaskDescription, CooperationType
-from tasks.base_task import BaseTask
-from typing import List
+from tasks.WantedQuests.config import CooperationSelectMaskDescription
 from module.logger import logger
 
 
@@ -25,13 +15,13 @@ class ScriptTask(GameUi, FindJadeAssets):
     fade_conf: FindJadeJSON = None
 
     def run(self):
-        self.ui_get_current_page()
 
         self.fade_conf = self.parse()
+        self.fade_conf.updateHandle=self.save_jade_json
         for accountInfo in self.fade_conf.find_jade_accounts_info:
             self.custom_config(self.config)
             logger.info("start %s-%s ", accountInfo.character, accountInfo.svr)
-            if not self.needLogin(accountInfo):
+            if not self.is_need_login(accountInfo):
                 logger.warning("%s Skipped last Login Time:%s", accountInfo.character, accountInfo.last_complete_time)
                 continue
             suc = SwitchAccount(self.config, self.device, accountInfo).switchAccount()
@@ -74,7 +64,7 @@ class ScriptTask(GameUi, FindJadeAssets):
         #         ('缘神一世', '立秋', '150****2279', True),
         #         ]
 
-    def needLogin(self, item: AccountInfo):
+    def is_need_login(self, item: AccountInfo):
         """
             根据上次登陆时间 判断是否需要登录查找
         @param item:
@@ -104,7 +94,7 @@ class ScriptTask(GameUi, FindJadeAssets):
             "get_invite_vip_name": WantedQuestsEx.get_invite_vip_name,
             "next_run": WantedQuestsEx.next_run,
             "invite_success_callback": WantedQuestsEx.invite_success_callback,
-            "get_config":WantedQuestsEx.get_config
+            "get_config": WantedQuestsEx.get_config
         })
         wq = WQEX(**kwargs)
         return wq
@@ -120,27 +110,20 @@ if __name__ == '__main__':
 
     from tasks.base_task import BaseTask
 
-    if getattr(BaseTask, "appear_then_click_origin", None) is None:
-        setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
+    # if getattr(BaseTask, "appear_then_click_origin", None) is None:
+    #     setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
+    #
+    #     from mypatch import appear_then_click_CRORZ
+    #
+    #     setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
 
-        from mypatch import appear_then_click_CRORZ
-        setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
+    from mypatch import SimplePatch
+
+    SimplePatch.patch()
 
     c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
-    # wq = t.CreatObjectFromModule("WantedQuests", config=t.config, device=t.device)
-    # wq.need_invite_vip = WantedQuestsEx.need_invite_vip
-    # wq.get_invite_vip_name = WantedQuestsEx.get_invite_vip_name
-    # t.fade_conf = t.parse()
-    # t.fade_conf.update_invite_history(CooperationType.Jade,"却把烟花嗅")
-    # t.fade_conf.save2file(c.model.find_jade.find_jade_config.find_jade_json_path)
-    # t.parse()
     #
-    # t.fade_conf.update_invite_history(CooperationType.Jade, "却把烟花嗅")
-    # t.fade_conf.save2file(".\\config\\findjade\\findjade.json")
 
-    # print(wq.need_invite_vip())
-    # t.fade_conf = t.parse()
-    # t.fade_conf.save2file("F:/download/1.json")
     t.run()

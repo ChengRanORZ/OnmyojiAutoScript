@@ -88,13 +88,15 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         @return:
         @rtype:
         """
-
+        logger.info("start switch_character")
         self.ui_click(self.C_SA_LOGIN_FORM_SWITCH_SVR_BTN, self.I_SA_CHECK_SELECT_SVR_1)
         # 展开底部角色列表,显示角色所属服务器
         self.screenshot()
-        if self.appear(self.I_SA_CHECK_SELECT_SVR_1) and (not self.appear(self.I_SA_CHECK_SELECT_SVR_2)):
+        while self.appear(self.I_SA_CHECK_SELECT_SVR_1) and (not self.appear(self.I_SA_CHECK_SELECT_SVR_2)):
             logger.info("open svr icon")
-            self.ui_click(self.C_SA_SELECT_SVR_CHARACTER_LIST, self.I_SA_CHECK_SELECT_SVR_2, 1.5)
+            self.click(self.C_SA_SELECT_SVR_CHARACTER_LIST, interval=1.5)
+            # self.ui_click(self.C_SA_SELECT_SVR_CHARACTER_LIST, self.I_SA_CHECK_SELECT_SVR_2, 1.5)
+            self.screenshot()
 
         self.O_SA_SELECT_SVR_CHARACTER_LIST.keyword = characterName
         lastCharacterNameList = []
@@ -154,6 +156,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         return
 
     def selectAccount(self, accountInfo: AccountInfo):
+        logger.info("start selectAccount")
         self.O_SA_ACCOUNT_ACCOUNT_LIST.keyword = accountInfo.account
         self.O_SA_ACCOUNT_ACCOUNT_SELECTED.keyword = accountInfo.account
         # 正常情况一次就行,但防不住OCR搞幺蛾子 保险起见 多来几次吧 反正挂机不差这点
@@ -274,8 +277,10 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 ocrRes = self.O_SA_LOGIN_FORM_USER_CENTER_ACCOUNT.ocr_single(self.device.image)
                 # NOTE 由于邮箱账号@符号极易被误识别为其他,故对账号信息做预处理 便于比对
                 if (accountInfo.account is None) or accountInfo.account == "" or accountInfo.is_account_alias(ocrRes):
+                    logger.info("current is the account we want:ocr result %s", ocrRes)
                     isAccountLogon = True
-                    self.click(self.C_SA_LOGIN_FORM_USER_CENTER_CLOSE_BTN, 1)
+                    self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_USER_CENTER_CLOSE_BTN, interval=1,
+                                                  stop=self.I_SA_SWITCH_ACCOUNT_BTN)
                     continue
                 #
                 if self.ui_click(self.I_SA_SWITCH_ACCOUNT_BTN, self.I_SA_NETEASE_GAME_LOGO):

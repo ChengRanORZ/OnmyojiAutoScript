@@ -72,6 +72,7 @@ class FindJadeJSON(BaseModel):
             if info.name != name:
                 continue
             info.add_invite_history(ctype, name)
+        self.updateHandle()
 
     def update_account_login_history(self, account: AccountInfo):
         accountInfoList = self.find_jade_accounts_info
@@ -79,6 +80,7 @@ class FindJadeJSON(BaseModel):
             if info.character != account.character or info.svr != account.svr:
                 continue
             info.last_complete_time = datetime.now()
+        self.updateHandle()
 
     def get_cooperation_type_mask(self) -> CooperationSelectMaskDescription:
         """
@@ -93,3 +95,9 @@ class FindJadeJSON(BaseModel):
 
     def save2file(self, conf_path):
         write_file(conf_path, self.dict())
+
+    def updateHandle(self):
+        """
+            需要刷新配置到磁盘时调用
+        """
+        pass

@@ -556,7 +556,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         @type stop:
         @return:
         """
-        if stop is None:
+        if isinstance(click, RuleImage) and stop is None:
             stop = click
         while 1:
             self.screenshot()

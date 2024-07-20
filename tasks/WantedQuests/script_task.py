@@ -204,9 +204,10 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 continue
             # 根据邀请按钮位置生成 对应的点击位置 打开追踪界面
             # NOTE magic Number
+            
             self.device.click(btn.roi_front[0], btn.roi_front[1] - 40, control_name=str(btn) + ' y-40')
             # 防止点击后界面来不及刷新
-            sleep(0.5)
+            sleep(1.5)
         # 关闭单个任务的追踪界面
         self.ui_click_until_disappear(self.C_WQ_TRACE_ONE_CLOSE, stop=self.I_WQ_TRACE_ONE_CHECK_OPENED, interval=1.5)
 

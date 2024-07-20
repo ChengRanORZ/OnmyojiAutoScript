@@ -82,6 +82,9 @@ class LoginHandler(BaseTask, RestartAssets):
                         logger.info("Close bind phone")
                         break
                 continue
+            if self.appear(self.I_INVITE_POPUP_CLOSE):
+
+                continue
             # 关闭阴阳师精灵提示
             if self.appear_then_click(self.I_LOGIN_LOGIN_ONMYOJI_GENIE):
                 logger.info("click onmyoji genie")

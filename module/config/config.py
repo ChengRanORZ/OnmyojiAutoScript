@@ -226,7 +226,7 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
         else:
             logger.critical("No task waiting or pending")
             logger.critical("Please enable at least one task")
-            raise RequestHumanTakeover
+            # raise RequestHumanTakeover
 
     def get_schedule_data(self) -> dict[str, dict]:
         """
