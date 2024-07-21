@@ -248,6 +248,7 @@ class SwitchSoul(BaseTask, SwitchSoulAssets):
             if self.ocr_appear_click_by_rule(self.O_SS_TEAM_NAME, self.I_SOU_CLICK_PRESENT, interval=1):
                 continue
             if self.appear_then_click(self.I_SOU_SWITCH_SURE, interval=1):
+                self.ui_click_until_disappear(self.I_SOU_SWITCH_SURE,interval=1)
                 break
         logger.info(f'Switch soul_one group {groupName} team {teamName}')
 

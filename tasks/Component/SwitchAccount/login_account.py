@@ -268,8 +268,9 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                         self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_ACCOUNT_CLOSE_BTN,
                                                       stop=self.I_SA_NETEASE_GAME_LOGO)
                         return False
-
-                self.ui_click(self.I_SA_ACCOUNT_LOGIN_BTN, self.I_SA_LOGIN_FORM_APPLE, 1)
+                    # selectAccount 后更新图片
+                    self.screenshot()
+                self.ui_click(self.I_SA_ACCOUNT_LOGIN_BTN, stop=self.I_SA_LOGIN_FORM_APPLE, interval=1)
                 continue
             # 在用户中心界面
             if self.appear(self.I_SA_SWITCH_ACCOUNT_BTN):
