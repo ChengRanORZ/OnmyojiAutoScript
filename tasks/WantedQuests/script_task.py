@@ -204,7 +204,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 continue
             # 根据邀请按钮位置生成 对应的点击位置 打开追踪界面
             # NOTE magic Number
-            
+
             self.device.click(btn.roi_front[0], btn.roi_front[1] - 40, control_name=str(btn) + ' y-40')
             # 防止点击后界面来不及刷新
             sleep(1.5)
@@ -434,8 +434,8 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                     logger.info("friend found and selected")
                     break
                 # TODO OCR识别到文字 但是没有选中 尝试重新选择  (选择好友时,弹出协作邀请导致选择好友失败)
-            # 在当前服务器没找到,切换服务器
-            self.click(self.I_WQ_INVITE_DIFF_SVR)
+            # 在当前服务器没找到,切换服务器  30s 防止短时间连续点击
+            self.click(self.I_WQ_INVITE_DIFF_SVR, interval=30)
             # NOTE 跨服好友刷新缓慢,切换标签页难以检测,姑且用延时.非常卡的模拟器可能出问题
             sleep(2)
         # 没有找到需要邀请的人,点击取消 返回悬赏封印界面

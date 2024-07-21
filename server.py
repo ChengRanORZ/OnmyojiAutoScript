@@ -62,7 +62,7 @@ def fun(ev: threading.Event):
     #     setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
     #     from mypatch import appear_then_click_CRORZ
     #     setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
-    mypatch.SimplePatch.patch()
+    # mypatch.SimplePatch.patch()
 
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
@@ -71,4 +71,7 @@ def fun(ev: threading.Event):
 
 
 if __name__ == "__main__":
+    import mypatch
+
+    mypatch.SimplePatch.patch()
     fun(None)

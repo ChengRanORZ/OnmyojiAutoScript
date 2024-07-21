@@ -37,7 +37,7 @@ class Full(BaseCor):
             return 0, 0, 0, 0
 
         index_list = self.filter(boxed_results, keyword)
-        logger.info(f"OCR [{self.name}] detected in {index_list}")
+        logger.info(f"OCR [{self.name}] detected {keyword} in {index_list}")
         # 如果一个都没有匹配到
         if not index_list:
             return 0, 0, 0, 0

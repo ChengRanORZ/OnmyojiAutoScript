@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from enum import IntEnum
 from pydantic import Field, BaseModel
@@ -56,7 +57,7 @@ class InviteInfo(BaseModel):
         pass
 
 
-class FindJadeJSON(BaseModel):
+class FindJadeJSON(BaseModel, extra='allow'):
     find_jade_accounts_info: list[AccountInfo]
     invite_info_list: list[InviteInfo]
 

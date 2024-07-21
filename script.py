@@ -349,6 +349,8 @@ class Script:
             module_path = str(Path.cwd() / 'tasks' / command / (module_name+'.py'))
             logger.info(f'module_path: {module_path}, module_name: {module_name}')
             task_module = load_module(module_name, module_path)
+            import mypatch
+            mypatch.SimplePatch.patch()
             task_module.ScriptTask(config=self.config, device=self.device).run()
         except TaskEnd:
             return True

@@ -17,9 +17,9 @@ class ScriptTask(GameUi, FindJadeAssets):
     def run(self):
 
         self.fade_conf = self.parse()
-        self.fade_conf.updateHandle=self.save_jade_json
+        # setattr(self.fade_conf, 'updateHandle', self.save_jade_json)
+        self.fade_conf.updateHandle = self.save_jade_json
         for accountInfo in self.fade_conf.find_jade_accounts_info:
-            self.custom_config(self.config)
             logger.info("start %s-%s ", accountInfo.character, accountInfo.svr)
             if not self.is_need_login(accountInfo):
                 logger.warning("%s Skipped last Login Time:%s", accountInfo.character, accountInfo.last_complete_time)
@@ -41,11 +41,6 @@ class ScriptTask(GameUi, FindJadeAssets):
                 continue
 
         pass
-
-    def custom_config(self, conf):
-        conf.wanted_quests.wanted_quests_config.cooperation_only = True
-        conf.wanted_quests.wanted_quests_config.cooperation_type = CooperationSelectMaskDescription.JadeAndFood
-        conf.wanted_quests.wanted_quests_config.invite_friend_name = "却把烟花嗅"
 
     def parse(self) -> FindJadeJSON:
         """
