@@ -15,9 +15,8 @@ class ScriptTask(GameUi, FindJadeAssets):
     fade_conf: FindJadeJSON = None
 
     def run(self):
-
         self.fade_conf = self.parse()
-        # setattr(self.fade_conf, 'updateHandle', self.save_jade_json)
+
         self.fade_conf.updateHandle = self.save_jade_json
         for accountInfo in self.fade_conf.find_jade_accounts_info:
             logger.info("start %s-%s ", accountInfo.character, accountInfo.svr)
@@ -26,6 +25,7 @@ class ScriptTask(GameUi, FindJadeAssets):
                 continue
             suc = SwitchAccount(self.config, self.device, accountInfo).switchAccount()
             if not suc:
+                logger.warning("switch to %s-%s Failed", accountInfo.character, accountInfo.svr)
                 continue
             #
             wq = self.CreatObjectFromModule("WantedQuests", config=self.config, device=self.device)
@@ -43,21 +43,11 @@ class ScriptTask(GameUi, FindJadeAssets):
         pass
 
     def parse(self) -> FindJadeJSON:
-        """
-            如果后期更改配置文件格式而做的先手准备,
-        @return:
-        @rtype:
-        """
+
         conf_path = self.config.find_jade.find_jade_config.find_jade_json_path
         jsonData = read_file(conf_path)
         fjconf = FindJadeJSON(**jsonData)
         return fjconf
-
-        # return [('缘神一世', '立秋', '150****2279', True),
-        #         ('缘神二世', '立秋', 'luorq05332@163.com', True),
-        #         ('停摆六世', '立秋', 'luorq05336@163.com', True),
-        #         ('缘神一世', '立秋', '150****2279', True),
-        #         ]
 
     def is_need_login(self, item: AccountInfo):
         """
@@ -102,16 +92,6 @@ class ScriptTask(GameUi, FindJadeAssets):
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
-
-    from tasks.base_task import BaseTask
-
-    # if getattr(BaseTask, "appear_then_click_origin", None) is None:
-    #     setattr(BaseTask, "appear_then_click_origin", BaseTask.appear_then_click)
-    #
-    #     from mypatch import appear_then_click_CRORZ
-    #
-    #     setattr(BaseTask, "appear_then_click", appear_then_click_CRORZ)
-
     from mypatch import SimplePatch
 
     SimplePatch.patch()
@@ -119,6 +99,5 @@ if __name__ == '__main__':
     c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
-    #
 
     t.run()
