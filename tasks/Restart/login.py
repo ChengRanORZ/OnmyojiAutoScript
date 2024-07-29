@@ -129,7 +129,7 @@ class LoginHandler(BaseTask, RestartAssets):
         :return: 如果没有发现任何奖励后退出
         """
         logger.hr('Harvest')
-        timer_harvest = Timer(3)  # 如果连续3秒没有发现任何奖励，退出
+        timer_harvest = Timer(5)  # 如果连续3秒没有发现任何奖励，退出
         while 1:
             self.screenshot()
 
@@ -144,6 +144,22 @@ class LoginHandler(BaseTask, RestartAssets):
             # 偶尔会打开到聊天频道
             if self.appear_then_click(self.I_HARVEST_CHAT_CLOSE, interval=1):
                 timer_harvest.reset()
+                continue
+            # 偶尔会进入其他页面
+            # 左上角的黄色关闭
+            if self.appear_then_click(self.I_LOGIN_YELLOW_CLOSE, interval=0.6):
+                logger.info('Close yellow close')
+                continue
+                # 关闭宠物小屋
+            if self.appear_then_click(self.I_HARVEST_BACK_PET_HOUSE, interval=0.6):
+                logger.info('Close yellow close')
+                continue
+                # 关闭姿度出现的蒙版
+            if self.appear(self.I_HARVEST_ZIDU, interval=1):
+                self.I_HARVEST_ZIDU.roi_front[0] -= 200
+                self.I_HARVEST_ZIDU.roi_front[1] -= 200
+                if self.click(self.I_HARVEST_ZIDU, interval=2):
+                    logger.info('Close zidu')
                 continue
 
             # 勾玉
@@ -194,6 +210,7 @@ class LoginHandler(BaseTask, RestartAssets):
                         if self.appear_then_click(self.I_HARVEST_MAIL_OPEN, interval=1):
                             timer_harvest.reset()
                             continue
+                    continue
             # 体力
             if self.appear_then_click(self.I_HARVEST_AP, interval=1, threshold=0.7):
                 timer_harvest.reset()
