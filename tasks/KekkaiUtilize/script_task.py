@@ -40,6 +40,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         self.realm_goto_grown()
         # 无论收不收到菜，都会进入看看至少看一眼时间还剩多少
         self.screenshot()
+        self.wait_until_appear(self.I_UTILIZE_ADD, False, 2)
         if not self.appear(self.I_UTILIZE_ADD):
             remaining_time = self.O_UTILIZE_RES_TIME.ocr(self.device.image)
             if not isinstance(remaining_time, timedelta):
@@ -49,7 +50,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             logger.info('Utilize failed, exit')
             self.back_guild()
             next_time = datetime.now() + remaining_time
-            self.set_next_run(task='KekkaiUtilize', success=False, finish=True, target=next_time)
+            self.set_next_run(task='KekkaiUtilize', success=True, finish=True, target=next_time)
             raise TaskEnd
         if not self.grown_goto_utilize():
             logger.info('Utilize failed, exit')
@@ -58,11 +59,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         self.set_next_run(task='KekkaiUtilize', success=True, finish=True)
         raise TaskEnd
 
-
-
-
-
-    def check_guild_ap_or_assets(self, ap_enable: bool=True, assets_enable: bool=True) -> bool:
+    def check_guild_ap_or_assets(self, ap_enable: bool = True, assets_enable: bool = True) -> bool:
         """
         在寮的主界面 检查是否有收取体力或者是收取寮资金
         如果有就顺带收取
@@ -120,7 +117,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             if self.appear_then_click(self.I_GUILD_REALM, interval=1):
                 continue
 
-    def check_box_ap_or_exp(self, ap_enable: bool=True, exp_enable: bool=True, exp_waste: bool=True) -> bool:
+    def check_box_ap_or_exp(self, ap_enable: bool = True, exp_enable: bool = True, exp_waste: bool = True) -> bool:
         """
         顺路检查盒子
         :param ap_enable:
@@ -139,7 +136,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                     continue
 
         # 先是体力盒子
-        def _check_ap_box(appear: bool=False):
+        def _check_ap_box(appear: bool = False):
             if not appear:
                 return False
             # 点击盒子
@@ -169,7 +166,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             _exit_to_realm()
 
         # 经验盒子
-        def _check_exp_box(appear: bool=False):
+        def _check_exp_box(appear: bool = False):
             if not appear:
                 logger.info('No exp box')
                 return False
@@ -345,6 +342,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         :param rule:
         :return:
         """
+
         def _current_select_best(last_best: CardClass or None) -> CardClass | None:
             """
             当前选中的最好的卡,(会自动和记录的最好的比较)
@@ -445,7 +443,6 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
         self.set_shikigami(shikigami_order, stop_image)
 
-
     def back_guild(self):
         """
         回到寮的界面
@@ -464,6 +461,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             if self.appear_then_click(self.I_UI_BACK_BLUE, interval=1):
                 continue
 
+
 if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
@@ -476,5 +474,3 @@ if __name__ == "__main__":
     # t.screenshot()
     # print(t.appear(t.I_BOX_EXP, threshold=0.6))
     # print(t.appear(t.I_BOX_EXP_MAX, threshold=0.6))
-
-

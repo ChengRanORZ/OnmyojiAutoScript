@@ -13,6 +13,13 @@ from module.exception import TaskEnd, RequestHumanTakeover, GameTooManyClickErro
 
 
 class LoginHandler(BaseTask, RestartAssets):
+    character: str
+
+    def __init__(self, *wargs, **kwargs):
+        super().__init__(*wargs, **kwargs)
+        self.character = self.config.restart.character
+        self.O_LOGIN_SPECIFIC_SERVE.keyword = self.character
+        # self.specific_usr = kwargs['config'].
 
     def _app_handle_login(self) -> bool:
         """
@@ -92,14 +99,17 @@ class LoginHandler(BaseTask, RestartAssets):
                 logger.info("click onmyoji genie")
                 continue
             # 点击屏幕进入游戏
-            if self.appear(self.I_LOGIN_SPECIFIC_SERVE, interval=0.6) and self.ocr_appear_click(
-                    self.O_LOGIN_SPECIFIC_SERVE, interval=0.6):
+            if self.appear(self.I_LOGIN_SPECIFIC_SERVE, interval=0.6) \
+                    and self.ocr_appear_click(self.O_LOGIN_SPECIFIC_SERVE, interval=0.6):
+                self.ui_click_until_disappear(self.C_LOGIN_ENSURE_LOGIN_CHARACTER_IN_SAME_SVR,
+                                              stop=self.I_LOGIN_SPECIFIC_SERVE, interval=2)
                 logger.info('login specific user')
                 continue
             # 点击’进入游戏‘
             if not self.appear(self.I_LOGIN_8):
                 continue
-            if self.ocr_appear_click(self.O_LOGIN_ENTER_GAME, interval=2.5):
+            if self.ocr_appear_click(self.O_LOGIN_ENTER_GAME, interval=3):
+                self.wait_until_appear(self.I_LOGIN_SPECIFIC_SERVE, False, wait_time=2)
                 continue
 
         return login_success
@@ -232,3 +242,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 if timer_harvest.reached():
                     logger.info('No more reward')
                     return
+
+    def set_specific_usr(self, character: str):
+        self.character = character
+        self.O_LOGIN_SPECIFIC_SERVE.keyword = character

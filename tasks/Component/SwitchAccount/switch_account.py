@@ -35,6 +35,8 @@ class SwitchAccount(LoginAccount, ExitGame, GameUi, SwitchAccountAssets):
             return False
         logger.info("%s login suc", self.toAccountInfo.character)
         # 处理位于登录界面各种奇葩弹窗
-        LoginHandler(self.config, self.device).app_handle_login()
+        login_handler = LoginHandler(config=self.config, device=self.device)
+        login_handler.set_specific_usr(self.toAccountInfo.svr)
+        login_handler.app_handle_login()
 
         return True

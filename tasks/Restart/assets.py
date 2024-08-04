@@ -45,13 +45,18 @@ class RestartAssets:
 	I_HARVEST_ZIDU = RuleImage(roi_front=(785,475,135,135), roi_back=(785,475,135,135), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_zidu.png")
 
 
+	# Click Rule Assets
+	# 相同服务器多个角色选择界面,点击空白区域 确认登录 
+	C_LOGIN_ENSURE_LOGIN_CHARACTER_IN_SAME_SVR = RuleClick(roi_front=(600,240,500,400), roi_back=(600,240,500,400), name="login_ensure_login_character_in_same_svr")
+
+
 	# Image Rule Assets
 	# 庭院卷轴打开 
 	I_LOGIN_SCROOLL_OPEN = RuleImage(roi_front=(1208,609,33,83), roi_back=(1208,609,33,83), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_scrooll_open.png")
 	# 庭院卷轴关闭 
 	I_LOGIN_SCROOLL_CLOSE = RuleImage(roi_front=(1181,634,28,39), roi_back=(1162,595,77,112), threshold=0.7, method="Template matching", file="./tasks/Restart/login/login_login_scrooll_close.png")
 	# description 
-	I_LOGIN_RED_CLOSE = RuleImage(roi_front=(1158,62,39,37), roi_back=(912,42,309,281), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_red_close.png")
+	I_LOGIN_RED_CLOSE = RuleImage(roi_front=(912,0,360,290), roi_back=(912,0,360,290), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_red_close.png")
 	# description 
 	I_LOGIN_YELLOW_CLOSE = RuleImage(roi_front=(29,17,46,44), roi_back=(0,0,94,86), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_yellow_close.png")
 	# 用于判断是否出现登录选区的 
@@ -80,6 +85,6 @@ class RestartAssets:
 	# 点击屏幕跳过 
 	O_LOGIN_SKIP_1 = RuleOcr(roi=(1046,35,130,37), area=(1046,35,130,37), mode="Single", method="Default", keyword="点击屏幕跳过", name="login_skip_1")
 	# 登录指定角色，默认第一个 
-	O_LOGIN_SPECIFIC_SERVE = RuleOcr(roi=(694,605,59,34), area=(516,75,662,585), mode="Single", method="Default", keyword="游戏", name="login_specific_serve")
+	O_LOGIN_SPECIFIC_SERVE = RuleOcr(roi=(110,120,350,600), area=(110,120,350,600), mode="Full", method="Default", keyword="", name="login_specific_serve")
 
 

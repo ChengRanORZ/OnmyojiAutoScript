@@ -92,9 +92,10 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
         self.ui_click(self.C_SA_LOGIN_FORM_SWITCH_SVR_BTN, self.I_SA_CHECK_SELECT_SVR_1)
         # 展开底部角色列表,显示角色所属服务器
         self.screenshot()
-        while self.appear(self.I_SA_CHECK_SELECT_SVR_1) and (not self.appear(self.I_SA_CHECK_SELECT_SVR_2)):
+        while (not self.appear(self.I_SA_CHECK_SELECT_SVR_2)) and self.appear(self.I_SA_CHECK_SELECT_SVR_1):
             logger.info("open svr icon")
             self.click(self.C_SA_SELECT_SVR_CHARACTER_LIST, interval=1.5)
+            self.wait_until_appear(self.I_SA_CHECK_SELECT_SVR_2, False, 1)
             # self.ui_click(self.C_SA_SELECT_SVR_CHARACTER_LIST, self.I_SA_CHECK_SELECT_SVR_2, 1.5)
             self.screenshot()
 
@@ -111,8 +112,9 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 if item != characterName:
                     continue
                 tmp = self.O_SA_SELECT_SVR_CHARACTER_LIST
+                from copy import deepcopy
                 tmpClick = RuleClick(
-                    roi_back=tmp.roi,
+                    roi_back=deepcopy(tmp.roi),
                     roi_front=[
                         tmp.roi[0] + ocrResBoxList[index][0][0],
                         tmp.roi[1] + ocrResBoxList[index][0][1],
@@ -125,7 +127,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                 # 所以需要获取到对应的服务器图标位置
                 tmpClick.roi_front[1] -= 30
                 self.ui_click_until_disappear(tmpClick, stop=self.I_SA_CHECK_SELECT_SVR_2,
-                                              interval=1)
+                                              interval=3)
                 logger.info("character %s found,and clicked svr icon", characterName)
                 return True
             if lastCharacterNameList == characterNameList:
@@ -309,7 +311,7 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             isCharacterSelected = self.switch_svr(accountInfo.svr)
         if isAccountLogon and isCharacterSelected:
             # 成功登录账号 找到角色
-            self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_ENTER_GAME_BTN, stop=self.I_CHECK_LOGIN_FORM)
+            # self.ui_click_until_disappear(self.C_SA_LOGIN_FORM_ENTER_GAME_BTN, stop=self.I_CHECK_LOGIN_FORM)
             logger.info("character %s-%s account:%s %s login Success", accountInfo.character, accountInfo.svr,
                         accountInfo.account,
                         'Android' if accountInfo.appleOrAndroid else 'Apple')
