@@ -51,7 +51,7 @@ def ui_click_CRORZ(self, click, stop, interval=1):
     :return:
     """
     # 强制增大interval
-    interval = 3
+    interval = 3 if interval<3 else interval
     while 1:
         self.screenshot()
         if self.appear(stop):

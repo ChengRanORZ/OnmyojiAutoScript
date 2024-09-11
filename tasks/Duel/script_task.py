@@ -106,7 +106,7 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
                 logger.info('You are already a celeb')
                 return None
             current_score = self.O_D_SCORE.ocr(self.device.image)
-            if current_score < 1200:
+            if current_score < 200:
                 # 分太低了
                 logger.warning('Score is too low')
                 logger.error('Please enhance your score')

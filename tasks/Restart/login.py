@@ -199,28 +199,28 @@ class LoginHandler(BaseTask, RestartAssets):
 
                 if self.appear_then_click(self.I_HARVEST_MAIL, interval=3):
                     timer_harvest.reset()
-                    continue
-                if self.appear(self.I_HARVEST_MAIL_TITLE, interval=2.5):
-                    while 1:
-                        self.screenshot()
-                        if self.appear_then_click(self.I_HARVEST_MAIL_ALL, interval=2):
-                            timer_harvest.reset()
-                            pass
-                        if self.appear_then_click(self.I_HARVEST_MAIL_CONFIRM, interval=1):
-                            continue
+                    self.wait_until_appear(self.I_HARVEST_MAIL_TITLE, wait_time=2)
+                    if self.appear(self.I_HARVEST_MAIL_TITLE, interval=2.5):
+                        while 1:
+                            self.screenshot()
+                            if self.appear_then_click(self.I_HARVEST_MAIL_ALL, interval=2):
+                                timer_harvest.reset()
+                                pass
+                            if self.appear_then_click(self.I_HARVEST_MAIL_CONFIRM, interval=1):
+                                continue
 
-                        # 如果一直出现收取全部，那就说明还在进行中
-                        if self.appear(self.I_HARVEST_MAIL_ALL):
-                            pass
-                        # 如果没有出现 ‘收取全部’ 也没有出现 ‘还未读的邮件’ 那就可以退出了
-                        if not self.appear(self.I_HARVEST_MAIL_ALL) and not self.appear(self.I_HARVEST_MAIL_OPEN):
-                            logger.info('Mail has been harvested')
-                            logger.info('Exit mail')
-                            break
-                        if self.appear_then_click(self.I_HARVEST_MAIL_OPEN, interval=1):
-                            timer_harvest.reset()
-                            continue
-                    continue
+                            # 如果一直出现收取全部，那就说明还在进行中
+                            if self.appear(self.I_HARVEST_MAIL_ALL):
+                                pass
+                            # 如果没有出现 ‘收取全部’ 也没有出现 ‘还未读的邮件’ 那就可以退出了
+                            if not self.appear(self.I_HARVEST_MAIL_ALL) and not self.appear(self.I_HARVEST_MAIL_OPEN):
+                                logger.info('Mail has been harvested')
+                                logger.info('Exit mail')
+                                break
+                            if self.appear_then_click(self.I_HARVEST_MAIL_OPEN, interval=1):
+                                timer_harvest.reset()
+                                continue
+                        continue
             # 体力
             if self.appear_then_click(self.I_HARVEST_AP, interval=1, threshold=0.7):
                 timer_harvest.reset()
@@ -231,7 +231,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 continue
 
             # 红色的关闭
-            if self.appear_then_click(self.I_UI_BACK_RED, interval=2.3):
+            if self.appear_then_click(self.I_UI_BACK_RED, interval=4):
                 timer_harvest.reset()
                 continue
 

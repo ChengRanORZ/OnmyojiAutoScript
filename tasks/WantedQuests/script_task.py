@@ -1,6 +1,8 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+import cv2
+
 import re
 import copy
 from time import sleep
@@ -54,25 +56,28 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 logger.warning('OCR failed too many times, exit')
                 break
             if self.ocr_appear(self.O_WQ_TEXT_1, interval=1):
-                cu, re, total = self.O_WQ_NUM_1.ocr(self.device.image)
-                if cu == re == total == 0:
+                cu, ree, total = self.O_WQ_NUM_1.ocr(self.device.image)
+                if cu == ree == total == 0:
                     logger.warning('OCR failed and skip this round')
                     ocr_error_count += 1
+                    cur = 0
+                    ree = 1
+                    total = 1
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
-                if cu < total and re != 0:
+                if cu < total and ree != 0:
                     self.execute_mission(self.O_WQ_TEXT_1, total, number_challenge)
 
             if self.ocr_appear(self.O_WQ_TEXT_2, interval=1):
-                cu, re, total = self.O_WQ_NUM_2.ocr(self.device.image)
-                if cu == re == total == 0:
+                cu, ree, total = self.O_WQ_NUM_2.ocr(self.device.image)
+                if cu == ree == total == 0:
                     logger.warning('OCR failed and skip this round')
                     ocr_error_count += 1
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
-                if cu < total and re != 0:
+                if cu < total and ree != 0:
                     self.execute_mission(self.O_WQ_TEXT_2, total, number_challenge)
                 continue
 
@@ -223,8 +228,9 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         while 1:
             self.screenshot()
             if self.appear(self.I_TRACE_TRUE):
+                logger.info("I_TRACE_TRUE appear")
                 break
-            if self.click(ocr, interval=1):
+            if self.click(ocr, interval=3):
                 continue
         if not self.appear(self.I_GOTO_1):
             # 如果没有出现 '前往'按钮， 那就是这个可能是神秘任务但是没有解锁
@@ -236,8 +242,14 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
 
         def check_battle(cha: bool, wq_type, wq_info) -> tuple:
             battle = False
-            self.screenshot()
-            type_wq = wq_type.ocr(self.device.image)
+            type_wq=""
+            while 1:
+                self.screenshot()
+                type_wq = wq_type.ocr(self.device.image)
+                if type_wq:
+                    break
+                logger.warning("WQ_TYPE ocr result is null")
+            logger.info("OCR RESULT:" +type_wq)
             if cha and type_wq == '挑战':
                 battle = 'CHALLENGE'
             if type_wq == '秘闻':
@@ -394,6 +406,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 if self.cooperation_invite(item['inviteBtn'], name):
                     item['inviteResult'] = True
                     index = 5
+                    continue
                 logger.info("%s not found,Wait 20s,%d invitations left", name, 5 - index - 1)
                 index += 1
                 sleep(20) if index < 5 else sleep(0)
@@ -429,6 +442,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             in_col_2 = self.ocr_appear_click(self.O_WQ_INVITE_COLUMN_2)
             find = in_col_2 or in_col_1
             if find:
+                sleep(4)
                 self.screenshot()
                 if self.appear(self.I_WQ_INVITE_SELECTED):
                     logger.info("friend found and selected")
@@ -437,14 +451,14 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             # 在当前服务器没找到,切换服务器  30s 防止短时间连续点击
             self.click(self.I_WQ_INVITE_DIFF_SVR, interval=30)
             # NOTE 跨服好友刷新缓慢,切换标签页难以检测,姑且用延时.非常卡的模拟器可能出问题
-            sleep(2)
+            sleep(4)
         # 没有找到需要邀请的人,点击取消 返回悬赏封印界面
         if not find:
             self.screenshot()
             self.ui_click_until_disappear(self.I_WQ_INVITE_CANCEL, interval=0.5)
             return False
         #
-        self.ui_click_until_disappear(self.I_WQ_INVITE_ENSURE)
+        self.ui_click_until_disappear(self.I_WQ_INVITE_ENSURE, interval=1)
         return True
 
     def get_cooperation_info(self) -> List:
@@ -514,6 +528,7 @@ if __name__ == '__main__':
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
-
+    img=cv2.imread("E:/1.png")
+    t.O_WQ_TYPE_1.ocr(img)
     t.run()
     # print(t.appear(t.I_WQ_CHECK_TASK))

@@ -17,7 +17,9 @@ from tasks.Delegation.assets import DelegationAssets
 class ScriptTask(GameUi, DelegationAssets):
 
     def run(self):
+        self.screenshot()
         self.ui_get_current_page()
+        self.screenshot()
         self.ui_goto(page_delegation)
         self.check_reward()
         con: DelegationConfig = self.config.delegation.delegation_config

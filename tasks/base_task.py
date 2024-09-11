@@ -76,6 +76,15 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         if not appear_invitation:
             return False
         logger.info('Invitation appearing')
+
+        wait_timer = Timer(2)
+        wait_timer.start()
+        while 1:
+            self.device.screenshot()
+            if self.appear(self.I_G_JADE) or wait_timer.reached():
+                break
+        logger.info("found JADE or Timeout")
+
         invite_type = self.config.global_game.emergency.friend_invitation
         detect_record = self.device.detect_record
         match invite_type:
@@ -607,5 +616,3 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             elif isinstance(click, RuleOcr):
                 self.click(click)
                 continue
-
-

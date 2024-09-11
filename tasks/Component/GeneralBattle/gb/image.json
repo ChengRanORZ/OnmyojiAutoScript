@@ -11,8 +11,8 @@
   {
     "itemName": "preset",
     "imageName": "gb_preset.png",
-    "roiFront": "32,650,47,45",
-    "roiBack": "32,650,47,45",
+    "roiFront": "30,640,60,180",
+    "roiBack": "30,640,60,180",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "预设的小图标"
