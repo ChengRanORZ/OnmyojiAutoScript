@@ -8,12 +8,14 @@ import numpy as np
 from ppocronnx.predict_system import BoxedResult
 from enum import Enum
 
+
 from module.base.decorator import cached_property
 from module.base.utils import area_pad, crop, float2str
 from module.ocr.ppocr import TextSystem
 from module.ocr.models import OCR_MODEL
 from module.exception import ScriptError
 from module.logger import logger
+
 
 
 def enlarge_canvas(image):
@@ -24,7 +26,7 @@ def enlarge_canvas(image):
     Also enlarge into the integer multiple of 32 cause PaddleOCR will downscale images to 1/32.
     """
     height, width = image.shape[:2]
-    length = int(max(width, height) // 32 * 32 + (0 if max(width, height) % 32 == 0 else 32))
+    length = int(max(width, height) // 32 * 32 + 32)
     border = (0, length - height, 0, length - width)
     if sum(border) > 0:
         image = cv2.copyMakeBorder(image, *border, borderType=cv2.BORDER_CONSTANT, value=(0, 0, 0))
@@ -38,12 +40,11 @@ class OcrMode(Enum):
     DIGITCOUNTER = 4  # str: "DigitCounter"
     DURATION = 5  # str: "Duration"
 
-
 class OcrMethod(Enum):
     DEFAULT = 1  # str: "Default"
 
-
 class BaseCor:
+
     lang: str = "ch"
     score: float = 0.6  # 阈值默认为0.5
 
@@ -53,6 +54,7 @@ class BaseCor:
     roi: list = []  # [x, y, width, height]
     area: list = []  # [x, y, width, height]
     keyword: str = ""  # 默认为空
+
 
     def __init__(self,
                  name: str,
@@ -145,7 +147,7 @@ class BaseCor:
         start_time = time.time()
         image = self.crop(image, self.roi)
         image = self.pre_process(image)
-
+        image = enlarge_canvas(image)
         # ocr
         result, score = self.model.ocr_single_line(image)
         if score < self.score:
@@ -157,7 +159,7 @@ class BaseCor:
                     text=f'[{result}]')
         return result
 
-    def detect_and_ocr(self, image, unclip_ratio=None, box_thrsh=None) -> list[BoxedResult]:
+    def detect_and_ocr(self, image) -> list[BoxedResult]:
         """
         注意：这里使用了预处理和后处理
         :param image:
@@ -184,7 +186,7 @@ class BaseCor:
                     text=str([result.ocr_text for result in results]))
         return results
 
-    def match(self, result: str, included: bool = False) -> bool:
+    def match(self, result: str, included: bool=False) -> bool:
         """
         使用ocr获取结果后和keyword进行匹配
         :param result:
@@ -196,7 +198,7 @@ class BaseCor:
         else:
             return self.keyword == result
 
-    def filter(self, boxed_results: list[BoxedResult], keyword: str = None) -> list or None:
+    def filter(self, boxed_results: list[BoxedResult], keyword: str=None) -> list or None:
         """
         使用ocr获取结果后和keyword进行匹配. 返回匹配的index list
         :param keyword: 如果不指定默认适用对象的keyword
@@ -261,6 +263,7 @@ class BaseCor:
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                     text=f'[{results}]')
         return results
+
 
 # def test():
 #     # strings = ["探", "索"]

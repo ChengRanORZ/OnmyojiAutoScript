@@ -25,11 +25,16 @@ class ConfigMenu:
                                    'TalismanPass', 'DemonEncounter', 'Pets', 'SoulsTidy', 'Delegation', 'WantedQuests',
                                    'Tako']
         # 很肝的任务
-        self.menu["Liver Emperor Exclusive"] = ['BondlingFairyland', 'EvoZone', 'GoryouRealm', 'Exploration',
-                                                'Hyakkiyakou', 'FindJade']
+        self.menu["Liver Emperor Exclusive"] = [
+            "BondlingFairyland",
+            "EvoZone",
+            "GoryouRealm",
+            "Exploration",
+            "Hyakkiyakou",
+            "HeroTest",
+        ]
         # 阴阳寮
-        self.menu["Guild"] = ['KekkaiUtilize', 'KekkaiActivation', 'RealmRaid', 'RyouToppa', 'Dokan',
-                              'CollectiveMissions',
+        self.menu["Guild"] = ['KekkaiUtilize', 'KekkaiActivation', 'RealmRaid', 'RyouToppa', 'Dokan', 'CollectiveMissions',
                               'Hunt']
         # 每周任务
         self.menu["Weekly Task"] = ['TrueOrochi', 'RichMan', 'Secret', 'WeeklyTrifles', 'MysteryShop', 'Duel']

@@ -199,9 +199,12 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 if self.appear(self.I_EXP_EXTRACT):
                     # 如果达到今日领取的最大，就不领取了
                     cur, res, totol = self.O_BOX_EXP.ocr(self.device.image)
-                    if cur == res == totol == 0:
-                        continue
-                    if cur == totol and cur + res == totol:
+                    if cur != 0 and totol != 0 and cur == totol and cur + res == totol:
+                        logger.info('Exp box reach max do not collect')
+                        break
+                    # 开启招财上宾后，上限增加20%，数值位置有偏移
+                    cur, res, totol = self.O_BOX_EXP_ZCSB.ocr(self.device.image)
+                    if cur != 0 and totol != 0 and cur == totol * 1.2 and cur + res == totol:
                         logger.info('Exp box reach max do not collect')
                         break
                 if self.appear_then_click(self.I_BOX_EXP, threshold=0.6, interval=1):
@@ -360,8 +363,8 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             if last_best is not None:
                 last_index = self.order_cards.index(last_best)
                 current_index = self.order_cards.index(card_class)
-                if current_index > last_index:
-                    # 不比上一张卡好就退出不执行操作
+                if current_index >= last_index:
+                    # 不比上一张卡好就退出不执行操作，相同星级卡亦跳过
                     logger.info('Current card is not better than last best card')
                     return last_best
             logger.info('Current select card: %s', card_class)
@@ -413,8 +416,12 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             return
         while 1:
             self.screenshot()
-            if self.appear(self.I_CHECK_FRIEND_REALM_1) \
-                    or self.appear(self.I_CHECK_FRIEND_REALM_3):
+            if self.appear(self.I_CHECK_FRIEND_REALM_1):
+                self.wait_until_stable(self.I_CHECK_FRIEND_REALM_1)
+                logger.info('Appear enter friend realm button')
+                break
+            if self.appear(self.I_CHECK_FRIEND_REALM_3):
+                self.wait_until_stable(self.I_CHECK_FRIEND_REALM_3)
                 logger.info('Appear enter friend realm button')
                 break
 
