@@ -158,14 +158,17 @@ class LoginHandler(BaseTask, RestartAssets):
             # 偶尔会进入其他页面
             # 左上角的黄色关闭
             if self.appear_then_click(self.I_LOGIN_YELLOW_CLOSE, interval=0.6):
+                timer_harvest.reset()
                 logger.info('Close yellow close')
                 continue
                 # 关闭宠物小屋
             if self.appear_then_click(self.I_HARVEST_BACK_PET_HOUSE, interval=0.6):
+                timer_harvest.reset()
                 logger.info('Close yellow close')
                 continue
                 # 关闭姿度出现的蒙版
             if self.appear(self.I_HARVEST_ZIDU, interval=1):
+                timer_harvest.reset()
                 self.I_HARVEST_ZIDU.roi_front[0] -= 200
                 self.I_HARVEST_ZIDU.roi_front[1] -= 200
                 if self.click(self.I_HARVEST_ZIDU, interval=2):
@@ -182,6 +185,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 continue
             # 某些活动的特殊签到，有空看到就删掉
             if self.appear_then_click(self.I_HARVEST_SIGN_3, interval=0.7):
+                timer_harvest.reset()
                 continue
             if self.appear_then_click(self.I_HARVEST_SIGN_4, interval=1):
                 timer_harvest.reset()

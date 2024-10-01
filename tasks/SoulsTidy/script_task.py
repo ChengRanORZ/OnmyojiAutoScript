@@ -126,31 +126,29 @@ class ScriptTask(GameUi, SoulsTidyAssets):
             if not self.appear(self.I_ST_DONATE):
                 logger.warning('Donate button not appear, skip')
                 continue
-            while 1:
+            if self.appear_then_click(self.I_UI_CONFIRM, interval=0.5):
+                continue
+            # 如果奉纳少就不是神赐而是获得奖励
+            if self.ui_reward_appear_click():
+                continue
+            # 出现神赐, 就点击然后消失，
+            if self.appear(self.I_ST_GOD_PRESENT):
+                logger.info('God present appear')
+                sleep(0.5)
                 self.screenshot()
-                if self.appear_then_click(self.I_UI_CONFIRM, interval=0.5):
+                if not self.appear(self.I_ST_GOD_PRESENT):
                     continue
-                # 如果奉纳少就不是神赐而是获得奖励
-                if self.ui_reward_appear_click():
-                    continue
-                # 出现神赐, 就点击然后消失，
-                if self.appear(self.I_ST_GOD_PRESENT):
-                    logger.info('God present appear')
-                    sleep(0.5)
+                while 1:
                     self.screenshot()
                     if not self.appear(self.I_ST_GOD_PRESENT):
+                        logger.info('God present disappear')
+                        break
+                    if self.click(self.C_ST_GOD_PRSENT, interval=1):
                         continue
-                    while 1:
-                        self.screenshot()
-                        if not self.appear(self.I_ST_GOD_PRESENT):
-                            logger.info('God present disappear')
-                            break
-                        if self.click(self.C_ST_GOD_PRSENT, interval=1):
-                            continue
-                    sleep(0.5)
-                    break
-                if self.appear_then_click(self.I_ST_DONATE, interval=5.5):
-                    continue
+                sleep(0.5)
+                break
+            if self.appear_then_click(self.I_ST_DONATE, interval=5.5):
+                continue
             logger.info('Donate one')
 
         logger.info('Bongna done')
