@@ -36,7 +36,8 @@ def appear_then_click_CRORZ(self,
         return appear
         # 有时间间隔限制
     # 强制增大interval
-    interval = 3
+    if interval<3:
+        interval = 3
 
     is_clicked = self.click(click=action if action else target, interval=interval)
     return appear and is_clicked
