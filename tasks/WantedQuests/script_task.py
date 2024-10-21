@@ -32,7 +32,17 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
     want_strategy_excluding: list[list] = []  # 不需要执行的
 
     def run(self):
-        con = self.config
+        con = self.config.model.wanted_quests
+        # 自动换御魂
+        if con.switch_soul_config.enable:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(con.switch_soul_config.switch_group_team)
+        if con.switch_soul_config.enable_switch_by_name:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(con.switch_soul_config.group_name, con.switch_soul_config.team_name)
+
         preSuc = False
         if (self.get_config()).cooperation_only:
             preSuc = self.pre_work_cooperation_only()
