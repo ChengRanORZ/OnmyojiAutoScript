@@ -1,8 +1,6 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-import cv2
-
 import re
 import copy
 from time import sleep
@@ -16,7 +14,7 @@ from module.logger import logger
 from module.base.timer import Timer
 
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_exploration
+from tasks.GameUi.page import page_main, page_exploration, page_shikigami_records
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
@@ -24,11 +22,14 @@ from tasks.Secret.script_task import ScriptTask as SecretScriptTask
 from tasks.WantedQuests.config import WantedQuestsConfig, CooperationType, CooperationSelectMask, \
     CooperationSelectMaskDescription
 from tasks.WantedQuests.assets import WantedQuestsAssets
+from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
 from tasks.Component.Costume.config import MainType
 from typing import List
+from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 
 
-class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
+class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
+    want_strategy_excluding: list[list] = []  # 不需要执行的
 
     def run(self):
         con = self.config
@@ -56,29 +57,34 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                 logger.warning('OCR failed too many times, exit')
                 break
             if self.ocr_appear(self.O_WQ_TEXT_1, interval=1):
-                cu, ree, total = self.O_WQ_NUM_1.ocr(self.device.image)
-                if cu == ree == total == 0:
-                    logger.warning('OCR failed and skip this round')
+                cu, re, total = self.O_WQ_NUM_1.ocr(self.device.image)
+                if cu == re == total == 0:
+                    logger.warning('OCR failed and have a try')
                     ocr_error_count += 1
-                    cur = 0
-                    ree = 1
-                    total = 1
+                    # 尝试打一次
+                    unknown_num = self.O_WQ_NUM_UNKNOWN_1.ocr(self.device.image)
+                    if unknown_num > 14:
+                        self.execute_mission(self.O_WQ_TEXT_1, 1, number_challenge)
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
-                if cu < total and ree != 0:
-                    self.execute_mission(self.O_WQ_TEXT_1, total, number_challenge)
+                if cu < total and re != 0:
+                    self.execute_mission(self.O_WQ_TEXT_1, min(total, 20), number_challenge)
 
             if self.ocr_appear(self.O_WQ_TEXT_2, interval=1):
-                cu, ree, total = self.O_WQ_NUM_2.ocr(self.device.image)
-                if cu == ree == total == 0:
-                    logger.warning('OCR failed and skip this round')
+                cu, re, total = self.O_WQ_NUM_2.ocr(self.device.image)
+                if cu == re == total == 0:
+                    logger.warning('OCR failed and have a try')
                     ocr_error_count += 1
+                    # 尝试打一次
+                    unknown_num = self.O_WQ_NUM_UNKNOWN_2.ocr(self.device.image)
+                    if unknown_num > 14:
+                        self.execute_mission(self.O_WQ_TEXT_2, 1, number_challenge)
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
-                if cu < total and ree != 0:
-                    self.execute_mission(self.O_WQ_TEXT_2, total, number_challenge)
+                if cu < total and re != 0:
+                    self.execute_mission(self.O_WQ_TEXT_2, min(total, 20), number_challenge)
                 continue
 
             if self.appear(self.I_WQ_CHECK_TASK):
@@ -224,11 +230,53 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         :param num_challenge: 现在有的挑战卷数量
         :return:
         """
+        OCR_WQ_TYPE = [self.O_WQ_TYPE_1, self.O_WQ_TYPE_2, self.O_WQ_TYPE_3, self.O_WQ_TYPE_4]
+        OCR_WQ_INFO = [self.O_WQ_INFO_1, self.O_WQ_INFO_2, self.O_WQ_INFO_3, self.O_WQ_INFO_4]
+        GOTO_BUTTON = [self.I_GOTO_1, self.I_GOTO_2, self.I_GOTO_3, self.I_GOTO_4]
+
+        def extract_info(index: int) -> tuple or None:
+            """
+            提取每一个地点的信息
+            :param index: 从零开始
+            :return:
+            (type, destination, number, goto_button)
+            (类型, 地点层级，可以打败的数量，前往按钮)
+            类型： 挑战0, 秘闻1， 探索2
+            """
+            layer_limit = {
+                # 低层不限制
+                # "壹", "贰", "叁", "肆", "伍", "陆",
+                "柒", "捌", "玖", "拾"
+            }
+            result = [-1, '', -1, GOTO_BUTTON[index]]
+            type_wq = OCR_WQ_TYPE[index].ocr(self.device.image)
+            info_wq_1 = OCR_WQ_INFO[index].ocr(self.device.image)
+            info_wq_1 = info_wq_1.replace('：', ':').replace('（', '(').replace('）', ')')
+            info_wq_1 = info_wq_1.replace('：', ':')
+            match = re.match(r"^(.*?)\(数量:\s*(\d+)\)", info_wq_1)
+            if not match:
+                return None
+            wq_destination = match.group(1)
+            wq_number = int(match.group(2))
+            # 跳过高层秘闻
+            if wq_destination[-1] in layer_limit:
+                logger.warning('This secret layer is too high')
+                return None
+            result[1] = wq_destination
+            result[2] = wq_number
+            if type_wq == '挑战':
+                result[0] = 0 if num_challenge >= 10 else -1
+            elif type_wq == '秘闻':
+                result[0] = 1
+            elif type_wq == '探索':
+                result[0] = 2
+            logger.info(f'[Wanted Quests] type: {type_wq} destination: {wq_destination} number: {wq_number} ')
+            return tuple(result) if result[0] != -1 else None
+
         logger.hr('Start wanted quests')
         while 1:
             self.screenshot()
             if self.appear(self.I_TRACE_TRUE):
-                logger.info("I_TRACE_TRUE appear")
                 break
             if self.click(ocr, interval=3):
                 continue
@@ -236,67 +284,40 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
             # 如果没有出现 '前往'按钮， 那就是这个可能是神秘任务但是没有解锁
             logger.warning('This is a secret mission but not unlock')
             self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
-            return
-        # 找到一个最优的关卡来挑战
-        challenge = True if num_challenge >= 10 else False
+            return False
 
-        def check_battle(cha: bool, wq_type, wq_info) -> tuple:
-            battle = False
-            type_wq=""
-            while 1:
-                self.screenshot()
-                type_wq = wq_type.ocr(self.device.image)
-                if type_wq:
-                    break
-                logger.warning("WQ_TYPE ocr result is null")
-            logger.info("OCR RESULT:" +type_wq)
-            if cha and type_wq == '挑战':
-                battle = 'CHALLENGE'
-            if type_wq == '秘闻':
-                battle = 'SECRET'
-            if not battle:
-                return None, None
-            info = wq_info.ocr(self.device.image)
-            try:
-                # 匹配： 第九章(数量:5)
-                one_number = int(re.findall(r'(\d+)', info)[-1])
-                # one_number = int(re.findall(r'\*\(\数量:\s*(\d+)\)', info)[0])
-            except IndexError:
-                # 匹配： 第九章
-                one_number = 3
-            # num_want / one_number = 一共要打几次
-            if one_number > num_want:
-                return battle, 1
-            else:
-                return battle, num_want // one_number + (1 if num_want % one_number > 0 else 0)
-
-        battle, num, goto = None, None, None
-        if not battle:
-            battle, num = check_battle(challenge, self.O_WQ_TYPE_1, self.O_WQ_INFO_1)
-            goto = self.I_GOTO_1
-        if not battle:
-            battle, num = check_battle(challenge, self.O_WQ_TYPE_2, self.O_WQ_INFO_2)
-            goto = self.I_GOTO_2
-        if not battle:
-            battle, num = check_battle(challenge, self.O_WQ_TYPE_3, self.O_WQ_INFO_3)
-            goto = self.I_GOTO_3
-        if not battle:
-            battle, num = check_battle(challenge, self.O_WQ_TYPE_4, self.O_WQ_INFO_4)
-            goto = self.I_GOTO_4
-        if battle == 'CHALLENGE':
-            self.challenge(goto, num)
-        elif battle == 'SECRET':
-            self.secret(goto, num)
-        else:
-            # 没有找到可以挑战的关卡 那就关闭
+        info_wq_list = []
+        for i in range(4):
+            info_wq = extract_info(i)
+            if info_wq:
+                info_wq_list.append(info_wq)
+        if not info_wq_list:
             logger.warning('No wanted quests can be challenged')
             return False
+        # sort
+        info_wq_list.sort(key=lambda x: x[0])
+        best_type, destination, once_number, goto_button = info_wq_list[0]
+        do_number = 1 if once_number >= num_want else num_want // once_number + (1 if num_want % once_number > 0 else 0)
+        match best_type:
+            case 0:
+                self.explore(goto_button, do_number)
+            case 1:
+                self.challenge(goto_button, do_number)
+            case 2:
+                self.secret(goto_button, do_number)
+            case _:
+                logger.warning('No wanted quests can be challenged')
+
+    def explore(self, goto, num):
+        self.challenge(goto, num)
 
     def challenge(self, goto, num):
         self.ui_click(goto, self.I_WQC_FIRE)
-        self.ui_click(self.I_WQC_LOCK, self.I_WQC_UNLOCK)
+        self.ui_click(self.I_WQC_UNLOCK, self.I_WQC_LOCK)
         self.ui_click_until_disappear(self.I_WQC_FIRE)
-        self.run_general_battle()
+        # 锁定阵容进入战斗
+        wq_config = GeneralBattleConfig(lock_team_enable=True)
+        self.run_general_battle(config=wq_config)
         self.wait_until_appear(self.I_WQC_FIRE, wait_time=4)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         # 我忘记了打完后是否需要关闭 挑战界面
@@ -368,7 +389,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
         self.invite_random(self.I_WQ_INVITE_2)
         self.invite_random(self.I_WQ_INVITE_3)
 
-    def all_cooperation_invite(self):
+    def all_cooperation_invite(self, name: str):
         """
             所有的协作任务依次邀请
             如果配置了只完成协作任务 还会将该任务设置为追踪
@@ -397,7 +418,6 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets):
                尝试5次 如果邀请失败 等待20s 重新尝试
                阴阳师BUG: 好友明明在线 但邀请界面找不到该好友(好友未接受任何协作任务的情况下)
            '''
-            #
             index = 0
             item['inviteResult'] = False
             name = self.get_invite_vip_name(item['type'])
@@ -524,11 +544,11 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('子曰')
+    c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
-    img=cv2.imread("E:/1.png")
-    t.O_WQ_TYPE_1.ocr(img)
+
     t.run()
-    # print(t.appear(t.I_WQ_CHECK_TASK))
+
+
