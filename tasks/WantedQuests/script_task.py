@@ -310,16 +310,16 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         do_number = 1 if once_number >= num_want else num_want // once_number + (1 if num_want % once_number > 0 else 0)
         match best_type:
             case 0:
-                self.explore(goto_button, do_number)
-            case 1:
                 self.challenge(goto_button, do_number)
-            case 2:
+            case 1:
                 self.secret(goto_button, do_number)
+            case 2:
+                self.explore(goto_button, do_number)
             case _:
                 logger.warning('No wanted quests can be challenged')
-
-    def explore(self, goto, num):
-        self.challenge(goto, num)
+        except ExploreWantedBoss:
+            logger.warning('The extreme case. The quest only needs to challenge one final boss, so skip it')
+            self.want_strategy_excluding.append(info_wq_list[0])
 
     def challenge(self, goto, num):
         self.ui_click(goto, self.I_WQC_FIRE)
@@ -547,7 +547,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         @param name:
         @type name:
         """
-        pass
+
+        return True
 
 
 if __name__ == '__main__':
