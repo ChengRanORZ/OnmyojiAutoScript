@@ -2,6 +2,7 @@ import sys
 
 import importlib
 from module.atom.click import RuleClick
+from module.atom.gif import RuleGif
 from module.atom.image import RuleImage
 from module.atom.long_click import RuleLongClick
 from module.atom.ocr import RuleOcr
@@ -10,7 +11,7 @@ import tasks
 
 
 def appear_then_click_CRORZ(self,
-                            target: RuleImage,
+                            target: RuleImage | RuleGif,
                             action: Union[RuleClick, RuleLongClick] = None,
                             interval: float = None,
                             threshold: float = None,
@@ -24,7 +25,7 @@ def appear_then_click_CRORZ(self,
     :param threshold:
     :return: True or False
     """
-    if not isinstance(target, RuleImage):
+    if not (isinstance(target, RuleImage) or isinstance(target, RuleGif)):
         return False
 
     appear = self.appear(target, threshold=threshold)
@@ -36,7 +37,7 @@ def appear_then_click_CRORZ(self,
         return appear
         # 有时间间隔限制
     # 强制增大interval
-    if interval<3:
+    if interval < 3:
         interval = 3
 
     is_clicked = self.click(click=action if action else target, interval=interval)
@@ -52,12 +53,12 @@ def ui_click_CRORZ(self, click, stop, interval=1):
     :return:
     """
     # 强制增大interval
-    interval = 3 if interval<3 else interval
+    interval = 3 if interval < 3 else interval
     while 1:
         self.screenshot()
         if self.appear(stop):
             return True
-        if isinstance(click, RuleImage):
+        if isinstance(click, RuleImage) or isinstance(click, RuleGif):
             self.appear_then_click(click, interval=interval)
             continue
         if isinstance(click, RuleClick) and self.click(click, interval=interval):

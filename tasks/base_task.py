@@ -389,8 +389,11 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         x, y = click.coord()
         if isinstance(click, RuleLongClick):
             self.device.long_click(x=x, y=y, duration=click.duration / 1000, control_name=click.name)
-        elif isinstance(click, RuleClick) or isinstance(click, RuleImage) or isinstance(click, RuleOcr):
+        elif isinstance(click, RuleClick) or isinstance(click, RuleImage) or isinstance(click, RuleGif) or isinstance(
+                click, RuleOcr):
             self.device.click(x=x, y=y, control_name=click.name)
+        else:
+            logger.info("DIDNT CLICK")
 
         # 执行后，如果有限制时间，则重置限制时间
         if interval:
@@ -594,7 +597,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             elif isinstance(click, RuleOcr) and self.ocr_appear_click(click, interval=interval):
                 continue
 
-    def ui_click_until_disappear(self, click, interval: float = 1, stop: RuleImage = None):
+    def ui_click_until_disappear(self, click, interval: float = 1, stop: RuleImage | RuleGif = None):
         """
         点击一个按钮直到stop消失
         如果click为RuleOcr ,直接当作RuleClick点击,不会进行ocr识别,
@@ -604,13 +607,13 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         @type stop:
         @return:
         """
-        if isinstance(click, RuleImage) and stop is None:
+        if (isinstance(click, RuleImage) or isinstance(click, RuleGif)) and (stop is None):
             stop = click
         while 1:
             self.screenshot()
             if not self.appear(stop):
                 break
-            if isinstance(click, RuleImage):
+            if isinstance(click, RuleImage) or isinstance(click, RuleGif):
                 self.appear_then_click(click, interval=interval)
                 continue
             elif isinstance(click, RuleClick):

@@ -327,6 +327,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets):
 
         准备找个号做做爬楼活动的每天300次试试
         '''
+        return True
         res = False
         # 三个行为中，任何一个生效了都返回True, 否则返回False
         if random_move:
@@ -343,13 +344,13 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets):
                 if num == 0:
                     self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep)
                 elif num == 1:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA3, interval=sleep)
                 elif num == 2:
                     self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA3, interval=sleep)
                 elif num == 3:
                     self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep)
                 else:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA3, interval=sleep)
             else:
                 # 假设安全区域是绿色的  
                 safe_color_lower = np.array([45, 25, 25])  # HSV颜色空间的绿色下界  

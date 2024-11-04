@@ -1,31 +1,23 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-import re
-import copy
 from time import sleep
-from datetime import timedelta, time, datetime
-from cached_property import cached_property
-from enum import Enum
-from module.atom.image import RuleImage
 
+import re
+from cached_property import cached_property
+from datetime import timedelta, time, datetime
+from module.atom.image import RuleImage
+from module.base.timer import Timer
 from module.exception import TaskEnd
 from module.logger import logger
-from module.base.timer import Timer
-
-from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_exploration, page_shikigami_records
-from tasks.Component.GeneralBattle.general_battle import GeneralBattle
-from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
-from tasks.Component.GeneralInvite.general_invite import GeneralInvite
-from tasks.Secret.script_task import ScriptTask as SecretScriptTask
-from tasks.WantedQuests.config import WantedQuestsConfig, CooperationType, CooperationSelectMask, \
-    CooperationSelectMaskDescription
-from tasks.WantedQuests.assets import WantedQuestsAssets
-from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
 from tasks.Component.Costume.config import MainType
+from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
+from tasks.GameUi.page import page_main, page_exploration, page_shikigami_records
+from tasks.Secret.script_task import ScriptTask as SecretScriptTask
+from tasks.WantedQuests.assets import WantedQuestsAssets
+from tasks.WantedQuests.config import CooperationType, CooperationSelectMask
+from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
 from typing import List
-from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 
 
 class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
@@ -308,21 +300,22 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         info_wq_list.sort(key=lambda x: x[0])
         best_type, destination, once_number, goto_button = info_wq_list[0]
         do_number = 1 if once_number >= num_want else num_want // once_number + (1 if num_want % once_number > 0 else 0)
-        match best_type:
-            case 0:
-                self.challenge(goto_button, do_number)
-            case 1:
-                self.secret(goto_button, do_number)
-            case 2:
-                self.explore(goto_button, do_number)
-            case _:
-                logger.warning('No wanted quests can be challenged')
+        try:
+            match best_type:
+                case 0:
+                    self.challenge(goto_button, do_number)
+                case 1:
+                    self.secret(goto_button, do_number)
+                case 2:
+                    self.explore(goto_button, do_number)
+                case _:
+                    logger.warning('No wanted quests can be challenged')
         except ExploreWantedBoss:
             logger.warning('The extreme case. The quest only needs to challenge one final boss, so skip it')
             self.want_strategy_excluding.append(info_wq_list[0])
 
-    def challenge(self, goto, num):
-        self.ui_click(goto, self.I_WQC_FIRE)
+    def challenge(self, goto_btn, num):
+        self.ui_click(goto_btn, self.I_WQC_FIRE)
         self.ui_click(self.I_WQC_UNLOCK, self.I_WQC_LOCK)
         self.ui_click_until_disappear(self.I_WQC_FIRE)
         # 锁定阵容进入战斗
@@ -399,7 +392,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         self.invite_random(self.I_WQ_INVITE_2)
         self.invite_random(self.I_WQ_INVITE_3)
 
-    def all_cooperation_invite(self, name: str):
+    def all_cooperation_invite(self, name: str=None):
         """
             所有的协作任务依次邀请
             如果配置了只完成协作任务 还会将该任务设置为追踪
@@ -430,7 +423,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
            '''
             index = 0
             item['inviteResult'] = False
-            name = self.get_invite_vip_name(item['type'])
+            if name is None:
+                name = self.get_invite_vip_name(item['type'])
             logger.warning("find cooperationType %s ,start invite %s", item['type'], name)
             while index < 5:
                 if self.cooperation_invite(item['inviteBtn'], name):
@@ -453,9 +447,6 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
     def cooperation_invite(self, btn: RuleImage, name: str):
         """
             单个协作任务邀请
-        @param btn:
-        @param name:
-        @return:
         """
         self.ui_click(btn, self.I_WQ_INVITE_ENSURE, interval=2.5)
         # 等待好友列表加载
@@ -561,5 +552,3 @@ if __name__ == '__main__':
     t.screenshot()
 
     t.run()
-
-

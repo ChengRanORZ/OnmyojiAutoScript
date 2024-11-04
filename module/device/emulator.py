@@ -326,3 +326,6 @@ class EmulatorManager(Connection):
         raise RequestHumanTakeover
 
 
+if __name__ == '__main__':
+    ma:EmulatorManager
+    ma.emulator_start()
